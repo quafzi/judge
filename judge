@@ -15,7 +15,8 @@ $loader = new UniversalClassLoader();
 
 // load default namespaces
 $namespaces = array(
-    'Jumpstorm'        => __DIR__.'/src',
+    //'Jumpstorm'        => __DIR__.'/src',
+    'Judge'            => __DIR__.'/src',
     'Netresearch'      => __DIR__.'/lib',
     'Symfony'          => __DIR__.'/lib',
     'Zend'             => __DIR__.'/lib'
@@ -33,9 +34,8 @@ $loader->register();
 
 use Symfony\Component\Console\Application;
 
-$console = new Application('Jumpstorm', '0.1');
-$console->add(new Jumpstorm\Magento());
-$console->add(new Jumpstorm\Unittesting());
-$console->add(new Jumpstorm\Extensions());
-$console->add(new Jumpstorm\Plugins());
+$console = new Application('Judge', '0.1');
+$console->add(new Judge\CoreHackDetector());
+//$console->add(new Judge\RewriteCounter());
+//$console->add(new Judge\MageCompat());
 $console->run();

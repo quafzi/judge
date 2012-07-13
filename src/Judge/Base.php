@@ -1,5 +1,5 @@
 <?php
-namespace Jumpstorm;
+namespace Judge;
 
 use Netresearch\Logger;
 use Netresearch\Config;
@@ -29,7 +29,8 @@ class Base extends Command
      */
     protected function configure()
     {
-        $this->addOption('config',  'c', InputOption::VALUE_OPTIONAL, 'provide a configuration file', 'ini/jumpstorm.ini');
+        $this->addOption('config',  'c', InputOption::VALUE_OPTIONAL, 'provide a configuration file', 'ini/sample.judge.ini');
+        $this->addOption('extensions',  'e', InputOption::VALUE_REQUIRED, 'path to the extensions to judge (separate by ",")');
     }
 
     protected function preExecute(InputInterface $input, OutputInterface $output)
