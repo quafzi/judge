@@ -118,6 +118,17 @@ class Logger
         }
         self::$results[$extension][$check]['comments'] = $comments;
     }
+    public static function addComment($extension, $check, $comment)
+
+    {
+        if (false == array_key_exists($extension, self::$results)
+            || false == array_key_exists($check, self::$results[$extension])
+            || false == array_key_exists('comments', self::$results[$extension][$check])
+        ) {
+            self::$results[$extension][$check]['comments'] = array();
+        }
+        self::$results[$extension][$check]['comments'][] = $comment;
+    }
 
     public static function setScore($extension, $check, $score)
     {
@@ -166,15 +177,19 @@ class Logger
     public static function printResults($extension)
     {
         foreach (self::getFailedChecks($extension) as $failedCheck) {
-            self::warning('"%s" failed check "%s"', array($extension, $failedCheck));
-            foreach (self::$results[$extension][$failedCheck]['comments'] as $comment) {
-                self::log('* ' . $comment);
+            self::error('<comment>"%s" failed check "%s"</comment>', array($extension, $failedCheck), false);
+            if (array_key_exists('comments', self::$results[$extension][$failedCheck])) {
+                foreach (self::$results[$extension][$failedCheck]['comments'] as $comment) {
+                    self::$output->writeln('* ' . $comment);
+                }
             }
         }
         foreach (self::getPassedChecks($extension) as $passedCheck) {
             self::log('"%s" passed check "%s"', array($extension, $passedCheck));
-            foreach (self::$results[$extension][$passedCheck]['comments'] as $comment) {
-                self::log('* ' . $comment);
+            if (array_key_exists('comments', self::$results[$extension][$passedCheck])) {
+                foreach (self::$results[$extension][$passedCheck]['comments'] as $comment) {
+                    self::log('* ' . $comment);
+                }
             }
         }
         $score = self::getScore($extension);
