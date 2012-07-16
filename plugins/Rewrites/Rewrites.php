@@ -35,7 +35,13 @@ class Rewrites implements JudgePlugin
             }
         }
 
-        $score = count($this->rewrites) <= $settings->allowedRewrites->count ? $settings->allowedRewrites->good : $settings->allowedRewrites->bad;
+        if (count($this->rewrites) <= $settings->allowedRewrites->count) {
+            $score = $settings->allowedRewrites->good;
+        } elseif ($settings->maxRewrites->count < count($this->rewrites)) {
+            $score = $settings->maxRewrites->good;
+        } else {
+            $score = $settings->maxRewrites->bad;
+        }
         foreach ($this->rewrites as $rewrite) {
             list($type, $code) = explode('s:', $rewrite);
             if ($this->isCritical($rewrite)) {
