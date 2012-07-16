@@ -7,6 +7,6 @@ interface PluginInterface
 {
     public function __construct(Config $config);
 
-    public function execute();
+    public function execute($extensionPath);
 }
 

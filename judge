@@ -35,7 +35,7 @@ $loader->register();
 use Symfony\Component\Console\Application;
 
 $console = new Application('Judge', '0.1');
-$console->add(new Judge\CoreHackDetector());
+$console->add(new Judge\Evaluate());
 //$console->add(new Judge\RewriteCounter());
 //$console->add(new Judge\MageCompat());
 $console->run();
