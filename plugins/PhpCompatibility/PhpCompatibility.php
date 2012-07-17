@@ -51,7 +51,6 @@ class PhpCompatibility implements JudgePlugin
                     $minReadable = $result['versions'][0];
                 }
                 if (false == is_null($currentMax) && $currentMax < $max) {
-                    die(var_dump(__FILE__ . ' on line ' . __LINE__ . ':', $currentMax, $max));
                     $max = $currentMax;
                     $maxReadable = $result['versions'][1];
                 }
