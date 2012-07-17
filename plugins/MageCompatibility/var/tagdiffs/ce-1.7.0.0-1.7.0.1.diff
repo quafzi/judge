@@ -1,0 +1,126 @@
+3389a3390,3392
+> Mage_Paypal_Block_Adminhtml_System_Config_Field_Country	app/code/core/Mage/Paypal/Block/Adminhtml/System/Config/Field/Country.php	/^class Mage_Paypal_Block_Adminhtml_System_Config_Field_Country$/;"	c
+> Mage_Paypal_Block_Adminhtml_System_Config_Field_Hidden	app/code/core/Mage/Paypal/Block/Adminhtml/System/Config/Field/Hidden.php	/^class Mage_Paypal_Block_Adminhtml_System_Config_Field_Hidden$/;"	c
+> Mage_Paypal_Block_Adminhtml_System_Config_Fieldset_Expanded	app/code/core/Mage/Paypal/Block/Adminhtml/System/Config/Fieldset/Expanded.php	/^class Mage_Paypal_Block_Adminhtml_System_Config_Fieldset_Expanded$/;"	c
+3390a3394
+> Mage_Paypal_Block_Adminhtml_System_Config_Fieldset_Group	app/code/core/Mage/Paypal/Block/Adminhtml/System/Config/Fieldset/Group.php	/^class Mage_Paypal_Block_Adminhtml_System_Config_Fieldset_Group$/;"	c
+3391a3396,3397
+> Mage_Paypal_Block_Adminhtml_System_Config_Fieldset_Location	app/code/core/Mage/Paypal/Block/Adminhtml/System/Config/Fieldset/Location.php	/^class Mage_Paypal_Block_Adminhtml_System_Config_Fieldset_Location$/;"	c
+> Mage_Paypal_Block_Adminhtml_System_Config_Fieldset_Payment	app/code/core/Mage/Paypal/Block/Adminhtml/System/Config/Fieldset/Payment.php	/^class Mage_Paypal_Block_Adminhtml_System_Config_Fieldset_Payment$/;"	c
+3471a3478
+> Mage_Paypal_Model_System_Config_Source_UrlMethod	app/code/core/Mage/Paypal/Model/System/Config/Source/UrlMethod.php	/^class Mage_Paypal_Model_System_Config_Source_UrlMethod$/;"	c
+12581a12589,12590
+> _decorateRowHtml	app/code/core/Mage/Adminhtml/Block/System/Config/Form/Field.php	/^    protected function _decorateRowHtml($element, $html)$/;"	f
+> _decorateRowHtml	app/code/core/Mage/Paypal/Block/Adminhtml/System/Config/Field/Hidden.php	/^    protected function _decorateRowHtml($element, $html)$/;"	f
+13254a13264
+> _getCallbackUrl	app/code/core/Mage/Paypal/Model/Payflowlink.php	/^    protected function _getCallbackUrl($actionName)$/;"	f
+13318a13329,13331
+> _getCollapseState	app/code/core/Mage/Paypal/Block/Adminhtml/System/Config/Fieldset/Expanded.php	/^    protected function _getCollapseState($element)$/;"	f
+> _getCollapseState	app/code/core/Mage/Paypal/Block/Adminhtml/System/Config/Fieldset/Group.php	/^    protected function _getCollapseState($element)$/;"	f
+> _getCollapseState	app/code/core/Mage/Paypal/Block/Adminhtml/System/Config/Fieldset/Payment.php	/^    protected function _getCollapseState($element)$/;"	f
+13600a13614
+> _getElementHtml	app/code/core/Mage/Paypal/Block/Adminhtml/System/Config/Field/Country.php	/^    protected function _getElementHtml(Varien_Data_Form_Element_Abstract $element)$/;"	f
+13641a13656
+> _getExtraJs	app/code/core/Mage/Paypal/Block/Adminhtml/System/Config/Fieldset/Location.php	/^    protected function _getExtraJs($element, $tooltipsExist = false)$/;"	f
+13655c13670
+< _getFieldsetCss	app/code/core/Mage/Adminhtml/Block/System/Config/Form/Fieldset.php	/^    protected function _getFieldsetCss()$/;"	f
+---
+> _getFieldsetCss	app/code/core/Mage/Adminhtml/Block/System/Config/Form/Fieldset.php	/^    protected function _getFieldsetCss($element = null)$/;"	f
+13707a13723,13724
+> _getFrontendClass	app/code/core/Mage/Adminhtml/Block/System/Config/Form/Fieldset.php	/^    protected function _getFrontendClass($element)$/;"	f
+> _getFrontendClass	app/code/core/Mage/Paypal/Block/Adminhtml/System/Config/Fieldset/Payment.php	/^    protected function _getFrontendClass($element)$/;"	f
+13741a13759,13761
+> _getHeaderCommentHtml	app/code/core/Mage/Adminhtml/Block/System/Config/Form/Fieldset.php	/^    protected function _getHeaderCommentHtml($element)$/;"	f
+> _getHeaderCommentHtml	app/code/core/Mage/Paypal/Block/Adminhtml/System/Config/Fieldset/Group.php	/^    protected function _getHeaderCommentHtml($element)$/;"	f
+> _getHeaderCommentHtml	app/code/core/Mage/Paypal/Block/Adminhtml/System/Config/Fieldset/Payment.php	/^    protected function _getHeaderCommentHtml($element)$/;"	f
+13743a13764,13765
+> _getHeaderTitleHtml	app/code/core/Mage/Adminhtml/Block/System/Config/Form/Fieldset.php	/^    protected function _getHeaderTitleHtml($element)$/;"	f
+> _getHeaderTitleHtml	app/code/core/Mage/Paypal/Block/Adminhtml/System/Config/Fieldset/Payment.php	/^    protected function _getHeaderTitleHtml($element)$/;"	f
+14960a14983
+> _initGroup	app/code/core/Mage/Adminhtml/Block/System/Config/Form.php	/^    protected function _initGroup($form, $group, $section, $parentElement = null)$/;"	f
+15413a15437
+> _isPaymentEnabled	app/code/core/Mage/Paypal/Block/Adminhtml/System/Config/Fieldset/Payment.php	/^    protected function _isPaymentEnabled($element)$/;"	f
+20519a20544
+> bindCheckingObserver	app/design/adminhtml/default/default/template/system/config/edit.phtml	/^            bindCheckingObserver: function(element) {$/;"	j
+21274a21300
+> checkPaymentConflicts	app/code/core/Mage/Paypal/Block/Adminhtml/System/Config/Fieldset/Location.php	/^                    checkPaymentConflicts: function(enabler, type) {$/;"	j
+21293a21320
+> checkRequired	app/design/adminhtml/default/default/template/system/config/edit.phtml	/^        checkRequired: function(element, callback) {$/;"	j
+21296a21324
+> checkRequirements	app/design/adminhtml/default/default/template/system/config/edit.phtml	/^            checkRequirements: function() {$/;"	j
+21316a21345
+> checklessEventAction	app/code/core/Mage/Paypal/Block/Adminhtml/System/Config/Fieldset/Location.php	/^                    checklessEventAction: function(element, isChange) {$/;"	j
+21861a21891,21892
+> configForm.validator.options.onFormValidate	app/code/core/Mage/Paypal/Block/Adminhtml/System/Config/Fieldset/Location.php	/^                configForm.validator.options.onFormValidate = function(result, form) {$/;"	j
+> configForm.validator.options.onFormValidate	app/design/adminhtml/default/default/template/system/config/edit.phtml	/^    configForm.validator.options.onFormValidate = function(result, form) {$/;"	j
+22150c22181
+< create	app/code/core/Mage/Sales/Model/Order/Shipment/Api/V2.php	/^    public function create($orderIncrementId, $itemsQty = array(), $comment = null, $email = false, $includeComment = false)$/;"	f
+---
+> create	app/code/core/Mage/Sales/Model/Order/Shipment/Api/V2.php	/^    public function create($orderIncrementId, $itemsQty = array(), $comment = null, $email = false,$/;"	f
+23377a23409
+> ecCheckAvailability	app/code/core/Mage/Paypal/Block/Adminhtml/System/Config/Fieldset/Location.php	/^                    ecCheckAvailability: function() {$/;"	j
+24279a24312
+> formatFilterConditionValue	app/code/core/Mage/Api/Helper/Data.php	/^    public function formatFilterConditionValue($conditionOperator, &$conditionValue)$/;"	f
+25758a25792
+> getCallbackController	app/code/core/Mage/Paypal/Model/Payflowlink.php	/^    public function getCallbackController()$/;"	f
+26478a26513
+> getConfigDataValue	app/code/core/Mage/Adminhtml/Model/Config/Data.php	/^    public function getConfigDataValue($path, &$inherit = null, $configData = null)$/;"	f
+26504a26540
+> getConfigRoot	app/code/core/Mage/Adminhtml/Model/Config/Data.php	/^    public function getConfigRoot()$/;"	f
+27597a27634
+> getDeleteElement	app/design/adminhtml/default/default/template/system/config/edit.phtml	/^        getDeleteElement: function(element) {$/;"	j
+29181a29219
+> getGroup	app/code/core/Mage/Adminhtml/Block/System/Config/Form/Fieldset.php	/^    public function getGroup($element = null)$/;"	f
+33290a33329
+> getRegisteredEvents	app/design/adminhtml/default/default/template/system/config/edit.phtml	/^        getRegisteredEvents: function(element) {$/;"	j
+34037a34077
+> getScopeElement	app/design/adminhtml/default/default/template/system/config/edit.phtml	/^        getScopeElement: function(element) {$/;"	j
+34296a34337
+> getSharedElements	app/code/core/Mage/Paypal/Block/Adminhtml/System/Config/Fieldset/Location.php	/^                    getSharedElements: function(element) {$/;"	j
+35908a35950
+> getUp	app/design/adminhtml/default/default/template/system/config/edit.phtml	/^        getUp: function (element, tag) {$/;"	j
+35912a35955,35956
+> getUpTd	app/design/adminhtml/default/default/template/system/config/edit.phtml	/^        getUpTd: function (element) {$/;"	j
+> getUpTr	app/design/adminhtml/default/default/template/system/config/edit.phtml	/^        getUpTr: function (element) {$/;"	j
+37096d37139
+< hideTooltip	app/code/core/Mage/Adminhtml/Block/System/Config/Form/Fieldset.php	/^                   function hideTooltip(event) {$/;"	f
+37347a37391
+> indicateEnabled	app/design/adminhtml/default/default/template/system/config/edit.phtml	/^            indicateEnabled: function() {$/;"	j
+38643d38686
+< items	app/code/core/Mage/Catalog/Model/Product/Api/V2.php	/^    public function items($filters = null, $store = null)$/;"	f
+38658d38700
+< items	app/code/core/Mage/Customer/Model/Customer/Api/V2.php	/^    public function items($filters)$/;"	f
+38664d38705
+< items	app/code/core/Mage/Sales/Model/Order/Api/V2.php	/^    public function items($filters = null)$/;"	f
+38667d38707
+< items	app/code/core/Mage/Sales/Model/Order/Invoice/Api/V2.php	/^    public function items($filters = null)$/;"	f
+38669d38708
+< items	app/code/core/Mage/Sales/Model/Order/Shipment/Api/V2.php	/^    public function items($filters = null)$/;"	f
+38780a38820
+> keydownCheckRequirements	app/design/adminhtml/default/default/template/system/config/edit.phtml	/^            keydownCheckRequirements: function() {$/;"	j
+39171a39212
+> loadCountryDependentSolutionsConfig	app/code/core/Mage/Paypal/Model/Observer.php	/^    public function loadCountryDependentSolutionsConfig(Varien_Event_Observer $observer)$/;"	f
+39440a39482
+> mapClasses	app/design/adminhtml/default/default/template/system/config/edit.phtml	/^        mapClasses: function(element, full, callback, classPrefix) {$/;"	j
+39998a40041,40042
+> onChangeEnabler	app/code/core/Mage/Paypal/Block/Adminhtml/System/Config/Fieldset/Location.php	/^                    onChangeEnabler: function(event) {$/;"	j
+> onClickEnablerScope	app/code/core/Mage/Paypal/Block/Adminhtml/System/Config/Fieldset/Location.php	/^                    onClickEnablerScope: function(event) {$/;"	j
+40020a40065,40066
+> onFormValidate	app/code/core/Mage/Paypal/Block/Adminhtml/System/Config/Fieldset/Location.php	/^                configForm.validator.options.onFormValidate = function(result, form) {$/;"	j
+> onFormValidate	app/design/adminhtml/default/default/template/system/config/edit.phtml	/^    configForm.validator.options.onFormValidate = function(result, form) {$/;"	j
+40047a40094
+> onchangeSharedElement	app/design/adminhtml/default/default/template/system/config/edit.phtml	/^        onchangeSharedElement: function(event) {$/;"	j
+40258a40306
+> parseFilters	app/code/core/Mage/Api/Helper/Data.php	/^    public function parseFilters($filters, $fieldsMap = null)$/;"	f
+40306a40355
+> paypalToggleSolution	app/code/core/Mage/Paypal/Block/Adminhtml/System/Config/Fieldset/Hint.php	/^            paypalToggleSolution = function(id, url) {$/;"	j
+41719a41769
+> render	app/code/core/Mage/Paypal/Block/Adminhtml/System/Config/Field/Country.php	/^    public function render(Varien_Data_Form_Element_Abstract $element)$/;"	f
+47059a47110
+> sharePayflowEnabling	app/code/core/Mage/Paypal/Block/Adminhtml/System/Config/Fieldset/Location.php	/^                    sharePayflowEnabling: function(enabler, isEvent) {$/;"	j
+47139d47189
+< showTooltip	app/code/core/Mage/Adminhtml/Block/System/Config/Form/Fieldset.php	/^                   function showTooltip(event) {$/;"	f
+47960a48011
+> toOptionArray	app/code/core/Mage/Paypal/Model/System/Config/Source/UrlMethod.php	/^    public function toOptionArray()$/;"	f
+48138a48190
+> togglePaypalSolutionConfigureButton	app/code/core/Mage/Paypal/Block/Adminhtml/System/Config/Fieldset/Hint.php	/^            togglePaypalSolutionConfigureButton = function(button, enable) {$/;"	j

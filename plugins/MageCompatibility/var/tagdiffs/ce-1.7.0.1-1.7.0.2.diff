@@ -1,0 +1,48 @@
+7706a7707
+> Zend_XmlRpc_Request	app/code/core/Zend/XmlRpc/Request.php	/^class Zend_XmlRpc_Request$/;"	c
+7709a7711
+> Zend_XmlRpc_Response	app/code/core/Zend/XmlRpc/Response.php	/^class Zend_XmlRpc_Response$/;"	c
+8651a8654,8655
+> __construct	app/code/core/Zend/XmlRpc/Request.php	/^    public function __construct($method = null, $params = null)$/;"	f
+> __construct	app/code/core/Zend/XmlRpc/Response.php	/^    public function __construct($return = null, $type = null)$/;"	f
+10125a10130,10131
+> __toString	app/code/core/Zend/XmlRpc/Request.php	/^    public function __toString()$/;"	f
+> __toString	app/code/core/Zend/XmlRpc/Response.php	/^    public function __toString()$/;"	f
+14703a14710
+> _getXmlRpcParams	app/code/core/Zend/XmlRpc/Request.php	/^    protected function _getXmlRpcParams()$/;"	f
+14704a14712
+> _getXmlRpcReturn	app/code/core/Zend/XmlRpc/Response.php	/^    protected function _getXmlRpcReturn()$/;"	f
+19419a19428
+> addParam	app/code/core/Zend/XmlRpc/Request.php	/^    public function addParam($value, $type = null)$/;"	f
+28087a28097,28098
+> getEncoding	app/code/core/Zend/XmlRpc/Request.php	/^    public function getEncoding()$/;"	f
+> getEncoding	app/code/core/Zend/XmlRpc/Response.php	/^    public function getEncoding()$/;"	f
+28456a28468,28469
+> getFault	app/code/core/Zend/XmlRpc/Request.php	/^    public function getFault()$/;"	f
+> getFault	app/code/core/Zend/XmlRpc/Response.php	/^    public function getFault()$/;"	f
+31117a31131
+> getMethod	app/code/core/Zend/XmlRpc/Request.php	/^    public function getMethod()$/;"	f
+32156a32171
+> getParams	app/code/core/Zend/XmlRpc/Request.php	/^    public function getParams()$/;"	f
+33715a33731
+> getReturnValue	app/code/core/Zend/XmlRpc/Response.php	/^    public function getReturnValue()$/;"	f
+35902a35919
+> getTypes	app/code/core/Zend/XmlRpc/Request.php	/^    public function getTypes()$/;"	f
+38033a38051,38052
+> isFault	app/code/core/Zend/XmlRpc/Request.php	/^    public function isFault()$/;"	f
+> isFault	app/code/core/Zend/XmlRpc/Response.php	/^    public function isFault()$/;"	f
+39349a39369,39370
+> loadXml	app/code/core/Zend/XmlRpc/Request.php	/^    public function loadXml($request)$/;"	f
+> loadXml	app/code/core/Zend/XmlRpc/Response.php	/^    public function loadXml($response)$/;"	f
+42729a42751,42752
+> saveXml	app/code/core/Zend/XmlRpc/Request.php	/^    public function saveXml()$/;"	f
+> saveXml	app/code/core/Zend/XmlRpc/Response.php	/^    public function saveXml()$/;"	f
+44099a44123,44124
+> setEncoding	app/code/core/Zend/XmlRpc/Request.php	/^    public function setEncoding($encoding)$/;"	f
+> setEncoding	app/code/core/Zend/XmlRpc/Response.php	/^    public function setEncoding($encoding)$/;"	f
+45109a45135
+> setMethod	app/code/core/Zend/XmlRpc/Request.php	/^    public function setMethod($method)$/;"	f
+45556a45583
+> setParams	app/code/core/Zend/XmlRpc/Request.php	/^    public function setParams()$/;"	f
+46099a46127
+> setReturnValue	app/code/core/Zend/XmlRpc/Response.php	/^    public function setReturnValue($value, $type = null)$/;"	f

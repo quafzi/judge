@@ -1,0 +1,178 @@
+1823c1823
+< Mage_Catalog_Model_Resource_Category_Flat	app/code/core/Mage/Catalog/Model/Resource/Category/Flat.php	/^class Mage_Catalog_Model_Resource_Category_Flat extends Mage_Core_Model_Resource_Db_Abstract$/;"	c
+---
+> Mage_Catalog_Model_Resource_Category_Flat	app/code/core/Mage/Catalog/Model/Resource/Category/Flat.php	/^class Mage_Catalog_Model_Resource_Category_Flat extends Mage_Index_Model_Resource_Abstract$/;"	c
+1907c1907
+< Mage_Catalog_Model_Resource_Product_Flat_Indexer	app/code/core/Mage/Catalog/Model/Resource/Product/Flat/Indexer.php	/^class Mage_Catalog_Model_Resource_Product_Flat_Indexer extends Mage_Core_Model_Resource_Db_Abstract$/;"	c
+---
+> Mage_Catalog_Model_Resource_Product_Flat_Indexer	app/code/core/Mage/Catalog/Model/Resource/Product/Flat/Indexer.php	/^class Mage_Catalog_Model_Resource_Product_Flat_Indexer extends Mage_Index_Model_Resource_Abstract$/;"	c
+2928a2929
+> Mage_Index_Block_Adminhtml_Process_Grid_Massaction	app/code/core/Mage/Index/Block/Adminhtml/Process/Grid/Massaction.php	/^class Mage_Index_Block_Adminhtml_Process_Grid_Massaction extends Mage_Adminhtml_Block_Widget_Grid_Massaction_Abstract$/;"	c
+3127a3129
+> Mage_Paypal_Block_Adminhtml_System_Config_Payflowlink_Advanced	app/code/core/Mage/Paypal/Block/Adminhtml/System/Config/Payflowlink/Advanced.php	/^ class Mage_Paypal_Block_Adminhtml_System_Config_Payflowlink_Advanced$/;"	c
+3137a3140,3143
+> Mage_Paypal_Block_Payflow_Advanced_Form	app/code/core/Mage/Paypal/Block/Payflow/Advanced/Form.php	/^class Mage_Paypal_Block_Payflow_Advanced_Form extends Mage_Paypal_Block_Payflow_Link_Form$/;"	c
+> Mage_Paypal_Block_Payflow_Advanced_Iframe	app/code/core/Mage/Paypal/Block/Payflow/Advanced/Iframe.php	/^class Mage_Paypal_Block_Payflow_Advanced_Iframe extends Mage_Paypal_Block_Payflow_Link_Iframe$/;"	c
+> Mage_Paypal_Block_Payflow_Advanced_Info	app/code/core/Mage/Paypal/Block/Payflow/Advanced/Info.php	/^class Mage_Paypal_Block_Payflow_Advanced_Info extends Mage_Paypal_Block_Payflow_Link_Info$/;"	c
+> Mage_Paypal_Block_Payflow_Advanced_Review	app/code/core/Mage/Paypal/Block/Payflow/Advanced/Review.php	/^class Mage_Paypal_Block_Payflow_Advanced_Review extends Mage_Paypal_Block_Payflow_Link_Review$/;"	c
+3139c3145
+< Mage_Paypal_Block_Payflow_Link_Iframe	app/code/core/Mage/Paypal/Block/Payflow/Link/Iframe.php	/^class Mage_Paypal_Block_Payflow_Link_Iframe extends Mage_Payment_Block_Form$/;"	c
+---
+> Mage_Paypal_Block_Payflow_Link_Iframe	app/code/core/Mage/Paypal/Block/Payflow/Link/Iframe.php	/^class Mage_Paypal_Block_Payflow_Link_Iframe extends Mage_Paypal_Block_Iframe$/;"	c
+3140a3147
+> Mage_Paypal_Block_Payflow_Link_Review	app/code/core/Mage/Paypal/Block/Payflow/Link/Review.php	/^class Mage_Paypal_Block_Payflow_Link_Review extends Mage_Paypal_Block_Express_Review$/;"	c
+3171a3179
+> Mage_Paypal_Model_Payflowadvanced	app/code/core/Mage/Paypal/Model/Payflowadvanced.php	/^class Mage_Paypal_Model_Payflowadvanced extends Mage_Paypal_Model_Payflowlink$/;"	c
+3197a3206
+> Mage_Paypal_PayflowadvancedController	app/code/core/Mage/Paypal/controllers/PayflowadvancedController.php	/^class Mage_Paypal_PayflowadvancedController extends Mage_Paypal_Controller_Express_Abstract$/;"	c
+4576a4586
+> OrderReviewController.prototype._submitOrder	app/design/frontend/base/default/template/paypal/express/review.phtml	/^    OrderReviewController.prototype._submitOrder = function() {$/;"	j
+8277d8286
+< __construct	downloader/lib/Mage/Connect/Packager.php	/^    public function __construct()$/;"	f
+10703a10713
+> _beforeToHtml	app/code/core/Mage/Paypal/Block/Payflow/Link/Review.php	/^    protected function _beforeToHtml()$/;"	f
+10748d10757
+< _buildPlaceRequest	app/code/core/Mage/Paypal/Model/Payflowlink.php	/^    protected function _buildPlaceRequest(Varien_Object $payment, $amount)$/;"	f
+10762c10771
+< _buildTokenRequest	app/code/core/Mage/Paypal/Model/Payflowlink.php	/^    protected function _buildTokenRequest(Varien_Object $payment, $amount)$/;"	f
+---
+> _buildTokenRequest	app/code/core/Mage/Paypal/Model/Payflowlink.php	/^    protected function _buildTokenRequest(Mage_Sales_Model_Order_Payment $payment)$/;"	f
+10853a10863
+> _cancelPayment	app/code/core/Mage/Paypal/controllers/PayflowadvancedController.php	/^    protected function _cancelPayment($errorMsg = '')$/;"	f
+10866a10877
+> _changeProcessKeyStatus	app/code/core/Mage/Index/Model/Indexer.php	/^    protected function _changeProcessKeyStatus($process, $enable = true)$/;"	f
+11557a11569,11570
+> _construct	app/code/core/Mage/Paypal/Block/Payflow/Advanced/Form.php	/^    protected function _construct()$/;"	f
+> _construct	app/code/core/Mage/Paypal/Block/Payflow/Advanced/Iframe.php	/^    protected function _construct()$/;"	f
+11558a11572
+> _construct	app/code/core/Mage/Paypal/Block/Payflow/Link/Iframe.php	/^    protected function _construct()$/;"	f
+11971a11986
+> _createTables	app/code/core/Mage/Catalog/Model/Resource/Category/Flat.php	/^    protected function _createTables()$/;"	f
+12669a12685
+> _getCheckout	app/code/core/Mage/Paypal/controllers/PayflowadvancedController.php	/^    protected function _getCheckout()$/;"	f
+12958a12975
+> _getEventTypeName	app/code/core/Mage/Index/Model/Indexer.php	/^    protected function _getEventTypeName($entityType = null, $eventType = null)$/;"	f
+13002a13020
+> _getFlatAttributes	app/code/core/Mage/Catalog/Model/Product/Indexer/Flat.php	/^    protected function _getFlatAttributes()$/;"	f
+13088a13107
+> _getIframeBlock	app/code/core/Mage/Paypal/controllers/PayflowadvancedController.php	/^    protected function _getIframeBlock()$/;"	f
+13319a13339
+> _getOrderFromResponse	app/code/core/Mage/Paypal/Model/Payflowlink.php	/^    protected function _getOrderFromResponse()$/;"	f
+13566d13585
+< _getSalesDocument	app/code/core/Mage/Paypal/Block/Payflow/Link/Iframe.php	/^    protected function _getSalesDocument()$/;"	f
+13574a13594
+> _getSearchableAttributes	app/code/core/Mage/CatalogSearch/Model/Indexer/Fulltext.php	/^    protected function _getSearchableAttributes()$/;"	f
+14906a14927
+> _mergeNewDataRecursive	app/code/core/Mage/Index/Model/Event.php	/^    protected function _mergeNewDataRecursive($previous, $current)$/;"	f
+16130a16152
+> _processEventsCollection	app/code/core/Mage/Index/Model/Process.php	/^    protected function _processEventsCollection($/;"	f
+16145a16168
+> _processOrder	app/code/core/Mage/Paypal/Model/Payflowlink.php	/^    protected function _processOrder(Mage_Sales_Model_Order $order)$/;"	f
+16822d16844
+< _setReferenceTransaction	app/code/core/Mage/Paypal/Model/Payflowlink.php	/^    protected function _setReferenceTransaction(Varien_Object $payment, $request)$/;"	f
+16962a16985
+> _submitOrder	app/design/frontend/base/default/template/paypal/express/review.phtml	/^    OrderReviewController.prototype._submitOrder = function() {$/;"	j
+17256c17279
+< _updateProcessData	app/code/core/Mage/Index/Model/Resource/Process.php	/^    protected function _updateProcessData($processId,$data)$/;"	f
+---
+> _updateProcessData	app/code/core/Mage/Index/Model/Resource/Process.php	/^    protected function _updateProcessData($processId, $data)$/;"	f
+17886a17910
+> addEventsStats	app/code/core/Mage/Index/Model/Resource/Process/Collection.php	/^    public function addEventsStats()$/;"	f
+18905d18928
+< allowCheckoutSteps	app/design/frontend/base/default/template/paypal/payflowlink/redirect.phtml	/^    function allowCheckoutSteps(allow)$/;"	f
+19242d19264
+< authorize	app/code/core/Mage/Paypal/Model/Payflowlink.php	/^    public function authorize(Varien_Object $payment, $amount)$/;"	f
+19800a19823
+> cancelPaymentAction	app/code/core/Mage/Paypal/controllers/PayflowadvancedController.php	/^    public function cancelPaymentAction()$/;"	f
+19815d19837
+< capture	app/code/core/Mage/Paypal/Model/Payflowlink.php	/^    public function capture(Varien_Object $payment, $amount)$/;"	f
+20201a20224
+> cleanNewData	app/code/core/Mage/Index/Model/Event.php	/^    public function cleanNewData()$/;"	f
+21301a21325
+> decorateUpdateRequired	app/code/core/Mage/Index/Block/Adminhtml/Process/Grid.php	/^    public function decorateUpdateRequired($value, $row, $column, $isExport)$/;"	f
+22578a22603
+> failProcess	app/code/core/Mage/Index/Model/Resource/Process.php	/^    public function failProcess(Mage_Index_Model_Process $process)$/;"	f
+22917a22943
+> formAction	app/code/core/Mage/Paypal/controllers/PayflowadvancedController.php	/^    public function formAction()$/;"	f
+23789a23816
+> getAttributeCodes	app/code/core/Mage/Catalog/Model/Product/Flat/Indexer.php	/^    public function getAttributeCodes()$/;"	f
+26199a26227
+> getDescription	app/code/core/Mage/Index/Model/Indexer/Abstract.php	/^    public function getDescription()$/;"	f
+27173c27201
+< getFinalPrice	app/code/core/Mage/Bundle/Model/Product/Price.php	/^    public function getFinalPrice($qty=null, $product)$/;"	f
+---
+> getFinalPrice	app/code/core/Mage/Bundle/Model/Product/Price.php	/^    public function getFinalPrice($qty = null, $product)$/;"	f
+27388a27417
+> getFormattedOption	app/code/core/Mage/Adminhtml/Block/Sales/Items/Column/Name.php	/^    public function getFormattedOption($value)$/;"	f
+27401a27431,27432
+> getFrameActionUrl	app/code/core/Mage/Paypal/Block/Payflow/Advanced/Form.php	/^    public function getFrameActionUrl()$/;"	f
+> getFrameActionUrl	app/code/core/Mage/Paypal/Block/Payflow/Advanced/Iframe.php	/^    public function getFrameActionUrl()$/;"	f
+27593a27625
+> getGridIdsJson	app/code/core/Mage/Index/Block/Adminhtml/Process/Grid/Massaction.php	/^    public function getGridIdsJson()$/;"	f
+29537a29570,29571
+> getMethodLinkDemoUrl	app/design/adminhtml/default/default/template/paypal/system/config/fieldset/global.phtml	/^    getMethodLinkDemoUrl: function(method)$/;"	j
+> getMethodLinkMoreUrl	app/design/adminhtml/default/default/template/paypal/system/config/fieldset/global.phtml	/^    getMethodLinkMoreUrl: function(method)$/;"	j
+34153a34188,34189
+> getUnprocessedEvents	app/code/core/Mage/Index/Model/Resource/Event.php	/^    public function getUnprocessedEvents($process)$/;"	f
+> getUnprocessedEventsCollection	app/code/core/Mage/Index/Model/Process.php	/^    public function getUnprocessedEventsCollection()$/;"	f
+34178a34215
+> getUpdateRequiredOptions	app/code/core/Mage/Index/Model/Process.php	/^    public function getUpdateRequiredOptions()$/;"	f
+35302d35338
+< hideFrame	app/design/frontend/base/default/template/paypal/payflowlink/iframe.phtml	/^    hideFrame: function(){$/;"	j
+35752d35787
+< initialize	app/design/frontend/base/default/template/paypal/payflowlink/iframe.phtml	/^    initialize: function(){$/;"	j
+36584a36620
+> isTestMode	app/code/core/Mage/Paypal/Block/Payflow/Advanced/Iframe.php	/^    public function isTestMode()$/;"	f
+36724a36761
+> isVisible	app/code/core/Mage/Index/Model/Indexer/Abstract.php	/^    public function isVisible()$/;"	f
+37633a37671
+> matchEntityAndType	app/code/core/Mage/Index/Model/Process.php	/^    public function matchEntityAndType($entity, $type)$/;"	f
+38112a38151
+> onFailure	app/design/frontend/base/default/template/paypal/express/review.phtml	/^                onFailure: function(){$/;"	j
+38135a38175
+> onSuccess	app/design/frontend/base/default/template/paypal/express/review.phtml	/^                onSuccess: function(transport) {$/;"	j
+38342c38382
+< parseCsv	app/code/core/Mage/Paypal/Model/Report/Settlement.php	/^    public function parseCsv($localCsv)$/;"	f
+---
+> parseCsv	app/code/core/Mage/Paypal/Model/Report/Settlement.php	/^    public function parseCsv($localCsv, $format = 'new')$/;"	f
+38620a38661
+> prepareOrderReview	app/code/core/Mage/Paypal/Model/Payflowlink.php	/^    public function prepareOrderReview($token = null)$/;"	f
+39292d39332
+< reindexAll	app/code/core/Mage/Bundle/Model/Resource/Indexer/Stock.php	/^    public function reindexAll()$/;"	f
+39294a39335
+> reindexAll	app/code/core/Mage/Catalog/Model/Product/Flat/Indexer.php	/^    public function reindexAll()$/;"	f
+39295a39337
+> reindexAll	app/code/core/Mage/Catalog/Model/Resource/Category/Flat.php	/^    public function reindexAll()$/;"	f
+39296a39339
+> reindexAll	app/code/core/Mage/Catalog/Model/Resource/Product/Flat/Indexer.php	/^    public function reindexAll()$/;"	f
+39306d39348
+< reindexAll	app/code/core/Mage/CatalogInventory/Model/Resource/Indexer/Stock/Configurable.php	/^    public function reindexAll()$/;"	f
+39308d39349
+< reindexAll	app/code/core/Mage/CatalogInventory/Model/Resource/Indexer/Stock/Grouped.php	/^    public function reindexAll()$/;"	f
+39338a39380
+> reindexProductPrices	app/code/core/Mage/Catalog/Model/Observer.php	/^    public function reindexProductPrices(Mage_Cron_Model_Schedule $schedule)$/;"	f
+39339a39382
+> reindexProductsMassAction	app/code/core/Mage/CatalogInventory/Model/Observer.php	/^    public function reindexProductsMassAction($observer)$/;"	f
+40142a40186
+> returnUrlAction	app/code/core/Mage/Paypal/controllers/PayflowadvancedController.php	/^    public function returnUrlAction()$/;"	f
+40343a40388
+> safeProcessEvent	app/code/core/Mage/Index/Model/Process.php	/^    public function safeProcessEvent(Mage_Index_Model_Event $event)$/;"	f
+43618a43664
+> setProcessIndexEvents	app/code/core/Mage/CatalogInventory/Model/Stock/Item.php	/^    public function setProcessIndexEvents($process = true)$/;"	f
+44186,44187d44231
+< setSpinnerDefaultText	app/design/frontend/base/default/template/paypal/payflowlink/iframe.phtml	/^    setSpinnerDefaultText: function(){$/;"	j
+< setSpinnerText	app/design/frontend/base/default/template/paypal/payflowlink/iframe.phtml	/^    setSpinnerText: function(text){$/;"	j
+44991d45034
+< showFrame	app/design/frontend/base/default/template/paypal/payflowlink/iframe.phtml	/^    showFrame: function(){$/;"	j
+44998d45040
+< showLoading	app/design/frontend/base/default/template/paypal/payflowlink/iframe.phtml	/^    showLoading: function(){$/;"	j
+45039a45082
+> silentPostAction	app/code/core/Mage/Paypal/controllers/PayflowadvancedController.php	/^    public function silentPostAction()$/;"	f
+46030a46074
+> trackWppPa	app/design/adminhtml/default/default/template/paypal/system/config/fieldset/global.phtml	/^    trackWppPa: function()$/;"	j
+46370a46415,46417
+> updateProcessEndDate	app/code/core/Mage/Index/Model/Resource/Process.php	/^    public function updateProcessEndDate(Mage_Index_Model_Process $process)$/;"	f
+> updateProcessEvents	app/code/core/Mage/Index/Model/Resource/Event.php	/^    public function updateProcessEvents($process, $status = Mage_Index_Model_Process::EVENT_STATUS_DONE)$/;"	f
+> updateProcessStartDate	app/code/core/Mage/Index/Model/Resource/Process.php	/^    public function updateProcessStartDate(Mage_Index_Model_Process $process)$/;"	f
+46851d46897
+< void	app/code/core/Mage/Paypal/Model/Payflowlink.php	/^    public function void(Varien_Object $payment)$/;"	f
