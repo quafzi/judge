@@ -22,12 +22,14 @@ class MageCompatibility implements JudgePlugin
 
         list($edition, $versionNumber) = explode('-', $settings->start);
 
-        $oldestVersion = $settings->start;
-        $latestVersion = $settings->start;
+        Logger::log("checking compatibility starting from $edition version $versionNumber");
+
+        $oldestVersion = $versionNumber;
+        $latestVersion = $versionNumber;
 
         $changesCount = 0;
         while (0 == $changesCount) {
-            $result = $this->checkCompatibilityBefore($edition, $versionNumber, $extensionPath);
+            $result = $this->checkCompatibilityBefore($edition, $oldestVersion, $extensionPath);
             if (is_null($result)) {
                 break;
             }
@@ -39,13 +41,23 @@ class MageCompatibility implements JudgePlugin
                     $this->name,
                     'Extension is compatible down to Magento ' . strtoupper($edition) . ' ' . $result['higherVersion']
                 );
+                Logger::addComment(
+                    $extensionPath,
+                    $this->name,
+                    'Found ' . $changesCount . ' possible incompatibilities to ' . $result['lowerVersion']
+                );
             } else {
-                $versionNumber = $result['lowerVersion'];
+                $oldestVersion = $result['lowerVersion'];
+                Logger::addComment(
+                    $extensionPath,
+                    $this->name,
+                    'Extension is compatible to Magento ' . strtoupper($edition) . ' ' . $oldestVersion
+                );
             }
         }
         $changesCount = 0;
         while (0 == $changesCount) {
-            $result = $this->checkCompatibilityAfter($edition, $versionNumber, $extensionPath);
+            $result = $this->checkCompatibilityAfter($edition, $latestVersion, $extensionPath);
             if (is_null($result)) {
                 break;
             }
@@ -57,23 +69,62 @@ class MageCompatibility implements JudgePlugin
                     $this->name,
                     'Extension is compatible up to Magento ' . strtoupper($edition) . ' ' . $result['lowerVersion']
                 );
+                Logger::addComment(
+                    $extensionPath,
+                    $this->name,
+                    'Found ' . $changesCount . ' possible incompatibilities to ' . $result['higherVersion']
+                );
             } else {
-                $versionNumber = $result['higherVersion'];
+                $latestVersion = $result['higherVersion'];
+                Logger::addComment(
+                    $extensionPath,
+                    $this->name,
+                    'Extension is compatible to Magento ' . strtoupper($edition) . ' ' . $latestVersion
+                );
             }
         }
-        //TODO: FAIL if there are less than 3 latest versions supported
-        //TODO: FAIL if the current version is not supported
-        if (0 < $changesCount) {
+        Logger::addComment(
+            $extensionPath,
+            $this->name,
+            '<info>Extension is compatible to Magento ' . strtoupper($edition) . ' ' . $oldestVersion . ' - ' . $latestVersion . '</info>'
+        );
+
+        /* fail if latest version is not supported */
+        if ($settings->latest->ce != $latestVersion) {
             Logger::addComment(
                 $extensionPath,
                 $this->name,
-                'Found ' . $changesCount . ' possible incompatibilities '
+                sprintf('<comment>Latest Magento version %s seems not to be supported (only up to %s)</comment>', $settings->latest->ce, $latestVersion)
             );
             Logger::setScore($extensionPath, $this->name, $settings->bad);
             return $settings->bad;
         }
+
+        /* fail if less than 3 latest versions supported */
+        $versionAge = $this->getVersionAge($edition, $oldestVersion);
+        if ($versionAge < $settings->minBackwardRange) {
+            Logger::addComment(
+                $extensionPath,
+                $this->name,
+                sprintf('<comment>Only the latest %s major releases seem to be supported (down to %s)</comment>', $versionAge, $oldestVersion)
+            );
+            Logger::setScore($extensionPath, $this->name, $settings->bad);
+            return $settings->bad;
+        }
+
         Logger::setScore($extensionPath, $this->name, $settings->good);
         return $settings->good;
+    }
+
+    protected function getVersionAge($edition, $version)
+    {
+        /* we only care about the x in 1.x.y */
+        $latest = $this->config->plugins->{$this->name}->latest->$edition;
+        $latest = explode('.', $latest);
+
+        $version = explode('.', $version);
+        
+        return (int) $version[1] - (int) $version[1] + 1;
     }
 
     protected function checkCompatibilityBefore($edition, $version, $extensionPath)
@@ -159,6 +210,7 @@ class MageCompatibility implements JudgePlugin
                 $changes[$direction][] = array(
                     'type'  => 'f',
                     'file'  => $filePath,
+                    'token' => $call,
                     'count' => count($detailedMatches)
                 );
             }
