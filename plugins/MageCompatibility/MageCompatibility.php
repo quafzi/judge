@@ -27,62 +27,30 @@ class MageCompatibility implements JudgePlugin
         $oldestVersion = $versionNumber;
         $latestVersion = $versionNumber;
 
+        /* check backward compatibility */
         $changesCount = 0;
         while (0 == $changesCount) {
             $result = $this->checkCompatibilityBefore($edition, $oldestVersion, $extensionPath);
-            if (is_null($result)) {
+            if (empty($result) || false == array_key_exists('changes', $result)) {
                 break;
             }
             $changes = $result['changes'];
             $changesCount = count($changes['upstream']);
-            if (0 < $changesCount) {
-                Logger::addComment(
-                    $extensionPath,
-                    $this->name,
-                    'Extension is compatible down to Magento ' . strtoupper($edition) . ' ' . $result['higherVersion']
-                );
-                Logger::addComment(
-                    $extensionPath,
-                    $this->name,
-                    'Found ' . $changesCount . ' possible incompatibilities to ' . $result['lowerVersion']
-                );
-            } else {
-                $oldestVersion = $result['lowerVersion'];
-                Logger::addComment(
-                    $extensionPath,
-                    $this->name,
-                    'Extension is compatible to Magento ' . strtoupper($edition) . ' ' . $oldestVersion
-                );
-            }
+            $oldestVersion = $result['farestVersion'];
         }
+        /* check forward compatibility (up to latest Magento version) */
         $changesCount = 0;
         while (0 == $changesCount) {
             $result = $this->checkCompatibilityAfter($edition, $latestVersion, $extensionPath);
-            if (is_null($result)) {
+            if (empty($result) || false == array_key_exists('changes', $result)) {
                 break;
             }
             $changes = $result['changes'];
             $changesCount = count($changes['downstream']);
-            if (0 < $changesCount) {
-                Logger::addComment(
-                    $extensionPath,
-                    $this->name,
-                    'Extension is compatible up to Magento ' . strtoupper($edition) . ' ' . $result['lowerVersion']
-                );
-                Logger::addComment(
-                    $extensionPath,
-                    $this->name,
-                    'Found ' . $changesCount . ' possible incompatibilities to ' . $result['higherVersion']
-                );
-            } else {
-                $latestVersion = $result['higherVersion'];
-                Logger::addComment(
-                    $extensionPath,
-                    $this->name,
-                    'Extension is compatible to Magento ' . strtoupper($edition) . ' ' . $latestVersion
-                );
-            }
+            $latestVersion = $result['farestVersion'];
         }
+
+        /* summarize compatibility */
         Logger::addComment(
             $extensionPath,
             $this->name,
@@ -100,7 +68,7 @@ class MageCompatibility implements JudgePlugin
             return $settings->bad;
         }
 
-        /* fail if less than 3 latest versions supported */
+        /* fail if less than 3 latest major versions are supported */
         $versionAge = $this->getVersionAge($edition, $oldestVersion);
         if ($versionAge < $settings->minBackwardRange) {
             Logger::addComment(
@@ -129,14 +97,62 @@ class MageCompatibility implements JudgePlugin
 
     protected function checkCompatibilityBefore($edition, $version, $extensionPath)
     {
-        return $this->checkDiff(current(glob(__DIR__."/var/tagdiffs/$edition-*-$version.diff")), $extensionPath);
+        $result = $this->checkDiff(current(glob(__DIR__."/var/tagdiffs/$edition-*-$version.diff")), $extensionPath);
+        if ($result) {
+            return $this->logChanges(
+                $result,
+                $extensionPath,
+                'down'
+            );
+        }
     }
 
     protected function checkCompatibilityAfter($edition, $version, $extensionPath)
     {
-        return $this->checkDiff(current(glob(__DIR__."/var/tagdiffs/$edition-$version-*.diff")), $extensionPath);
+        $result = $this->checkDiff(current(glob(__DIR__."/var/tagdiffs/$edition-$version-*.diff")), $extensionPath);
+        if ($result) {
+            return $this->logChanges(
+                $result,
+                $extensionPath,
+                'up'
+            );
+        }
     }
 
+    protected function logChanges($result, $extensionPath, $direction)
+    {
+        $critical = $direction=='up' ? 'up'     : 'down';
+        $previous = $direction=='up' ? 'higher' : 'lower';
+        $next     = $direction=='up' ? 'lower'  : 'higher';
+
+        $changes = $result['changes'];
+        $edition = $result['edition'];
+        $result['farestVersion'] = $result[$previous . 'Version'];
+        $changesCount = count($changes[$critical . 'stream']);
+        if (!$edition) {
+            die(var_dump(__FILE__ . ' on line ' . __LINE__ . ':', $result, $direction));
+        }
+        if (0 < $changesCount) {
+            Logger::addComment(
+                $extensionPath,
+                $this->name,
+                'Extension is compatible ' . $direction . ' to Magento ' . strtoupper($edition) . ' ' . $result['farestVersion']
+            );
+            Logger::addComment(
+                $extensionPath,
+                $this->name,
+                'Found ' . $changesCount . ' possible incompatibilities to ' . $result[$next . 'Version']
+            );
+        } else {
+            $result['farestVersion'] = $result[$next . 'Version'];
+            Logger::addComment(
+                $extensionPath,
+                $this->name,
+                'Extension is compatible to Magento ' . strtoupper($edition) . ' ' . $result['farestVersion']
+            );
+        }
+        return $result;
+    }
 
     protected function checkDiff($pathToDiff, $extensionPath)
     {
@@ -147,6 +163,7 @@ class MageCompatibility implements JudgePlugin
         $filename = end(explode('/', $pathToDiff));
         list($edition, $lower, $higher) = explode('-', str_replace('.diff', '', $filename));
         $result = array(
+            'edition'       => $edition,
             'lowerVersion'  => $lower,
             'higherVersion' => $higher,
         );
@@ -195,6 +212,10 @@ class MageCompatibility implements JudgePlugin
 
         /* analyze method params */
         preg_match('/function\W+(.*\))/', $codeLine, $matches);
+        if (count($matches) < 2) {
+            /* we assume no change if method call does not end up with a closing parenthesis */
+            return $changes;
+        }
         $call = $matches[1];
         $paramsCount = $this->getCountOfParams($call);
 
