@@ -167,7 +167,6 @@ class MageCompatibility implements JudgePlugin
         if (false == $pathToDiff) {
             return null;
         }
-        $settings = $this->config->plugins->{$this->name};
         $filename = basename($pathToDiff);
         list($edition, $lower, $higher) = explode('-', str_replace('.diff', '', $filename));
         $result = array(
@@ -175,7 +174,13 @@ class MageCompatibility implements JudgePlugin
             'lowerVersion'  => $lower,
             'higherVersion' => $higher,
         );
-        Logger::log("checking compatibility change between $edition version $lower and $higher");
+        $versionToCheck = self::CRITICAL_DIRECTION_UP ? $lower : $higher;
+        if ($this->versionIsSupported($edition, $versionToCheck)) {
+            Logger::log("extension is known to be compatible to " . strtoupper($edition) . " version $versionToCheck");
+            $result['changes'] = array();
+            return $result;
+        }
+        Logger::log("checking compatibility change between " . strtoupper($edition) . " version $lower and $higher");
         $changes = array();
         $changesCount = 0;
         $fileHandle = fopen($pathToDiff, 'r');
@@ -194,6 +199,16 @@ class MageCompatibility implements JudgePlugin
         }
         $result['changes'] = $changes;
         return $result;
+    }
+
+    protected function versionIsSupported($edition, $version)
+    {
+        foreach ($this->config->plugins->{$this->name}->supportedVersions as $supportedVersion) {
+            if ($supportedVersion == $edition . '-' . $version) {
+                return true;
+            }
+        }
+        return false;
     }
 
     protected function findIncompatibleFunction($extensionPath, $direction, $token, $codeLine, $type, $path)
