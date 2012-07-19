@@ -7,6 +7,9 @@ use Netresearch\PluginInterface as JudgePlugin;
 
 class MageCompatibility implements JudgePlugin
 {
+    const CRITICAL_DIRECTION_UP   = '<';
+    const CRITICAL_DIRECTION_DOWN = '>';
+
     protected $config   = null;
     protected $name     = null;
 
@@ -35,7 +38,10 @@ class MageCompatibility implements JudgePlugin
                 break;
             }
             $changes = $result['changes'];
-            $changesCount = count($changes['upstream']);
+            $changesCount = count($changes);
+            if ($result['farestVersion'] == $oldestVersion) {
+                break;
+            }
             $oldestVersion = $result['farestVersion'];
         }
         /* check forward compatibility (up to latest Magento version) */
@@ -46,7 +52,10 @@ class MageCompatibility implements JudgePlugin
                 break;
             }
             $changes = $result['changes'];
-            $changesCount = count($changes['downstream']);
+            $changesCount = count($changes);
+            if ($result['farestVersion'] == $latestVersion) {
+                break;
+            }
             $latestVersion = $result['farestVersion'];
         }
 
@@ -92,46 +101,35 @@ class MageCompatibility implements JudgePlugin
 
         $version = explode('.', $version);
         
-        return (int) $version[1] - (int) $version[1] + 1;
+        return (int) $latest[1] - (int) $version[1] + 1;
     }
 
     protected function checkCompatibilityBefore($edition, $version, $extensionPath)
     {
-        $result = $this->checkDiff(current(glob(__DIR__."/var/tagdiffs/$edition-*-$version.diff")), $extensionPath);
+        $result = $this->checkDiff(current(glob(__DIR__."/var/tagdiffs/$edition-*-$version.diff")), $extensionPath, self::CRITICAL_DIRECTION_DOWN);
         if ($result) {
-            return $this->logChanges(
-                $result,
-                $extensionPath,
-                'down'
-            );
+            return $this->logChanges($result, $extensionPath, 'down');
         }
     }
 
     protected function checkCompatibilityAfter($edition, $version, $extensionPath)
     {
-        $result = $this->checkDiff(current(glob(__DIR__."/var/tagdiffs/$edition-$version-*.diff")), $extensionPath);
+        $result = $this->checkDiff(current(glob(__DIR__."/var/tagdiffs/$edition-$version-*.diff")), $extensionPath, self::CRITICAL_DIRECTION_UP);
         if ($result) {
-            return $this->logChanges(
-                $result,
-                $extensionPath,
-                'up'
-            );
+            return $this->logChanges($result, $extensionPath, 'up');
         }
     }
 
     protected function logChanges($result, $extensionPath, $direction)
     {
         $critical = $direction=='up' ? 'up'     : 'down';
-        $previous = $direction=='up' ? 'higher' : 'lower';
-        $next     = $direction=='up' ? 'lower'  : 'higher';
+        $previous = $direction=='up' ? 'lower'  : 'higher';
+        $next     = $direction=='up' ? 'higher' : 'lower';
 
         $changes = $result['changes'];
         $edition = $result['edition'];
         $result['farestVersion'] = $result[$previous . 'Version'];
-        $changesCount = count($changes[$critical . 'stream']);
-        if (!$edition) {
-            die(var_dump(__FILE__ . ' on line ' . __LINE__ . ':', $result, $direction));
-        }
+        $changesCount = count($changes);
         if (0 < $changesCount) {
             Logger::addComment(
                 $extensionPath,
@@ -141,19 +139,17 @@ class MageCompatibility implements JudgePlugin
             Logger::addComment(
                 $extensionPath,
                 $this->name,
-                'Found ' . $changesCount . ' possible incompatibilities to ' . $result[$next . 'Version']
+                'Found ' . $changesCount . ' possible incompatibilities ' . $direction . ' to ' . $result[$next . 'Version']
             );
             $changedTags = array();
-            foreach ($changes[$critical . 'stream'] as $change) {
-                $changedTag = '<comment>' . $change['token'] . '</comment> (changed at ' . $change['path'] . ')';
-                if (array_key_exists($changedTag, $changedTags)) {
-                    $changedTags[$changedTag]++;
-                } else {
-                    $changedTags[$changedTag] = 1;
+            foreach ($changes as $change) {
+                $tokenComment = '<comment>' . $change['token'] . '</comment> (changed at ' . $change['path'] . ')';
+                $context = array();
+                foreach ($change['files'] as $file=>$matchDetails) {
+                    $context = array_unique(array_merge($context, $matchDetails['contextTokens']));
                 }
-            }
-            foreach ($changedTags as $tag=>$count) {
-                Logger::addComment($extensionPath, $this->name, $count . '* ' . $tag);
+                $contextComment = implode('", "', $context);
+                Logger::addComment($extensionPath, $this->name, count($change['files']) . ' files calling ' . $tokenComment . ', with context "' . $contextComment . '"');
             }
         } else {
             $result['farestVersion'] = $result[$next . 'Version'];
@@ -166,13 +162,13 @@ class MageCompatibility implements JudgePlugin
         return $result;
     }
 
-    protected function checkDiff($pathToDiff, $extensionPath)
+    protected function checkDiff($pathToDiff, $extensionPath, $criticalDirection)
     {
         if (false == $pathToDiff) {
             return null;
         }
         $settings = $this->config->plugins->{$this->name};
-        $filename = end(explode('/', $pathToDiff));
+        $filename = basename($pathToDiff);
         list($edition, $lower, $higher) = explode('-', str_replace('.diff', '', $filename));
         $result = array(
             'edition'       => $edition,
@@ -180,26 +176,19 @@ class MageCompatibility implements JudgePlugin
             'higherVersion' => $higher,
         );
         Logger::log("checking compatibility change between $edition version $lower and $higher");
-        $changes = array(
-            'upstream'   => array(),
-            'downstream' => array()
-        );
+        $changes = array();
         $changesCount = 0;
         $fileHandle = fopen($pathToDiff, 'r');
         while ($line = trim(fgets($fileHandle))) {
             $direction = substr($line, 0, 1);
-            if (is_numeric($direction)) {
+            if ($criticalDirection !== $direction) {
                 continue;
             }
-            if ('---' == $line) {
-                continue;
-            }
-            $direction = $direction=='>' ? 'upstream' : 'downstream';
             list ($token, $path, $codeLine, $type) = explode("\t", substr($line, 2));
             if ('f' == $type) {
-                $changes = array_merge_recursive(
+                $changes = array_merge(
                     $changes,
-                    $this->findDeprecatedFunction($extensionPath, $direction, $token, $codeLine, $type, $path)
+                    $this->findIncompatibleFunction($extensionPath, $direction, $token, $codeLine, $type, $path)
                 );
             }
         }
@@ -207,18 +196,15 @@ class MageCompatibility implements JudgePlugin
         return $result;
     }
 
-    protected function findDeprecatedFunction($extensionPath, $direction, $token, $codeLine, $type, $path)
+    protected function findIncompatibleFunction($extensionPath, $direction, $token, $codeLine, $type, $path)
     {
-        $changes = array(
-            'upstream'   => array(),
-            'downstream' => array()
-        );
+        $changes = array();
 
         /* find extension files including a call of a method with that name */
         $command = 'grep -rEl "' . $token . '" ' . $extensionPath . '/app';
-        exec($command, $usedInFile, $return);
+        exec($command, $filesWithThatToken, $return);
 
-        if (0 == count($usedInFile)) {
+        if (0 == count($filesWithThatToken)) {
             return $changes;
         }
 
@@ -232,24 +218,107 @@ class MageCompatibility implements JudgePlugin
         $paramsCount = $this->getCountOfParams($call);
 
         /* look for changed function calls, regarding its params */
-        $regexp = "\->(\n|\W)*$token(\n|\W)*\(";
-        $regexp .= $this->getRegexpForParams($paramsCount['required'], $paramsCount['optional']);
-        $regexp .= "\)";
-        foreach ($usedInFile as $filePath) {
+        $paramRegexp = "\->(\n|\W)*$token(\n|\W)*\(";
+        $paramRegexp .= $this->getRegexpForParams($paramsCount['required'], $paramsCount['optional']);
+        $paramRegexp .= "\)";
+
+        $contextTokens = $this->getContextTokens($path, $token, $codeLine);
+
+        $filesTouchedByChange = array();
+
+        /* lets have a detailed look at the files we found */
+        foreach ($filesWithThatToken as $filePath) {
             $content = file_get_contents($filePath);
-            preg_match('/' . $regexp . '/mU', $content, $detailedMatches);
+            /* check if parameters count matches the changed call */
+            preg_match('/' . $paramRegexp . '/mU', $content, $detailedMatches);
+
             if (count($detailedMatches)) {
-                $filePath = str_replace($extensionPath, '', $filePath);
-                $changes[$direction][] = array(
-                    'type'  => 'f',
-                    'file'  => $filePath,
-                    'token' => $call,
-                    'path'  => $path,
-                    'count' => count($detailedMatches)
+                /* check if the context matches */
+                $contextResult = $this->codeMatchesContext(
+                    $this->getDefaultHeaderCleanedContent($content),
+                    $contextTokens
+                );
+                if (false == $contextResult) {
+                    continue;
+                }
+                $relativeFilePath = str_replace($extensionPath, '', $filePath);
+                $filesTouchedByChange[$relativeFilePath] = array(
+                    'count'               => count($contextResult['matches']),
+                    'contextTokens'       => $contextResult['matches'],
+                    'contextMatchDetails' => $contextResult['details']
                 );
             }
         }
+        if (0 < count($filesTouchedByChange)) {
+            $changes[] = array(
+                'type'          => 'f',
+                'files'         => $filesTouchedByChange,
+                'token'         => $call,
+                'path'          => $path,
+            );
+        }
         return $changes;
+    }
+
+    protected function getDefaultHeaderCleanedContent($content)
+    {
+        $classPos = strpos($content, "\nclass ");
+        return $classPos ? substr($content, $classPos) : $content;
+    }
+
+    protected function getContextTokens($path, $token, $codeLine)
+    {
+        $irrelevantParts = array(
+            'abstract',
+            'adminhtml',
+            'app',
+            'block',
+            'class',
+            'code',
+            'collection',
+            'config',
+            'core',
+            'eav',
+            'helper',
+            'lib',
+            'mage',
+            'model',
+            'mysql4',
+            'resource',
+            'set',
+            'source',
+            'store',
+            'system',
+            'type',
+            'varien',
+            'zend'
+        );
+        $pathParts = explode('/', str_replace('.php' , '', strtolower($path)));
+        return array_diff($pathParts, $irrelevantParts);
+    }
+
+    protected function codeMatchesContext($content, $contextTokens)
+    {
+        $contextMatches = array();
+        $contextMatchDetails = array();
+        foreach ($contextTokens as $contextToken) {
+            if (strlen($contextToken) < 4) {
+                continue;
+            }
+            $contextRegexp = '/[^a-z]' . $contextToken . '[^a-z]/i';
+            preg_match($contextRegexp, $content, $tokenMatches);
+            if (0 < count($tokenMatches)) {
+                $contextMatchDetails[] = $tokenMatches;
+                $contextMatches[] = $contextToken;
+            }
+        }
+        if (0 < count($contextMatches)) {
+            return array(
+                'matches' => $contextMatches,
+                'details' => $contextMatchDetails
+            );
+        }
+        return false;
     }
 
     protected function getRegexpForParams($required, $optional)
