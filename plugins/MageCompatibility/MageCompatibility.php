@@ -143,6 +143,18 @@ class MageCompatibility implements JudgePlugin
                 $this->name,
                 'Found ' . $changesCount . ' possible incompatibilities to ' . $result[$next . 'Version']
             );
+            $changedTags = array();
+            foreach ($changes[$critical . 'stream'] as $change) {
+                $changedTag = '<comment>' . $change['token'] . '</comment> (changed at ' . $change['path'] . ')';
+                if (array_key_exists($changedTag, $changedTags)) {
+                    $changedTags[$changedTag]++;
+                } else {
+                    $changedTags[$changedTag] = 1;
+                }
+            }
+            foreach ($changedTags as $tag=>$count) {
+                Logger::addComment($extensionPath, $this->name, $count . '* ' . $tag);
+            }
         } else {
             $result['farestVersion'] = $result[$next . 'Version'];
             Logger::addComment(
@@ -187,7 +199,7 @@ class MageCompatibility implements JudgePlugin
             if ('f' == $type) {
                 $changes = array_merge_recursive(
                     $changes,
-                    $this->findDeprecatedFunction($extensionPath, $direction, $token, $codeLine, $type)
+                    $this->findDeprecatedFunction($extensionPath, $direction, $token, $codeLine, $type, $path)
                 );
             }
         }
@@ -195,7 +207,7 @@ class MageCompatibility implements JudgePlugin
         return $result;
     }
 
-    protected function findDeprecatedFunction($extensionPath, $direction, $token, $codeLine, $type)
+    protected function findDeprecatedFunction($extensionPath, $direction, $token, $codeLine, $type, $path)
     {
         $changes = array(
             'upstream'   => array(),
@@ -232,6 +244,7 @@ class MageCompatibility implements JudgePlugin
                     'type'  => 'f',
                     'file'  => $filePath,
                     'token' => $call,
+                    'path'  => $path,
                     'count' => count($detailedMatches)
                 );
             }
