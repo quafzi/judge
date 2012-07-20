@@ -1,0 +1,20 @@
+{
+    "name": "netresearch/judge",
+    "description": "Magento extension evaluator",
+    "require": {
+        "pdepend/pdepend": "dev-master",
+        "eher/phpunit": "dev-master",
+        "phpmd/phpmd": "dev-master",
+        "zerkalica/PHP_Codesniffer": "dev-master"
+    },
+    "authors": [
+        {
+            "name": "Thomas Birke",
+            "email": "thomas.birke@netresearch.de"
+        },
+        {
+            "name": "Michael Lühr",
+            "email": "michael.luehr@netresearch.de"
+        }
+    ]
+}
