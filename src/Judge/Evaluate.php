@@ -57,7 +57,7 @@ class Evaluate extends Command
             foreach ($plugins as $name => $settings) {
                 $results[$extensionPath] = 0;
                 // check if plugin was defined in ini, but disabled
-                if ('0' === $settings->enabled) {
+                if ('0' === $settings->checkEnabled) {
                     Logger::log('Skipping plugin "%s"', array($name));
                     continue;
                 }
