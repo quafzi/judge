@@ -59,7 +59,7 @@ class SourceCodeComplexity implements JudgePlugin
             Logger::addComment(
                 $extensionPath,
                 $this->name,
-                '<info>Mess detector found ' . $count($mdResults) . 'only</info>' . $issue
+                '<info>Mess detector found ' . count($mdResults) . 'only</info>'
             );
         }
         return $score;
