@@ -5,8 +5,6 @@ use Netresearch\Config;
 use Netresearch\Logger;
 use Netresearch\PluginInterface as JudgePlugin;
 
-require_once 'Bartlett/PHP/CompatInfo.php';
-
 /**
  * check PHP compatibility
  */
@@ -24,6 +22,8 @@ class PhpCompatibility implements JudgePlugin
 
     public function execute($extensionPath)
     {
+        require_once 'plugins/' . $this->name . '/lib/PHP/CompatInfo/PHP/CompatInfo/Autoload.php';
+
         $settings = $this->config->plugins->{$this->name};
         $this->extensionPath = $extensionPath;
 
