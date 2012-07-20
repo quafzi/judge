@@ -100,7 +100,7 @@ class MageCompatibility implements JudgePlugin
         $latest = explode('.', $latest);
 
         $version = explode('.', $version);
-        
+
         return (int) $latest[1] - (int) $version[1] + 1;
     }
 
@@ -203,9 +203,11 @@ class MageCompatibility implements JudgePlugin
 
     protected function versionIsSupported($edition, $version)
     {
-        foreach ($this->config->plugins->{$this->name}->supportedVersions as $supportedVersion) {
-            if ($supportedVersion == $edition . '-' . $version) {
-                return true;
+        if (!is_null($this->config->plugins->{$this->name}->supportedVersions)) {
+            foreach ($this->config->plugins->{$this->name}->supportedVersions as $supportedVersion) {
+                if ($supportedVersion == $edition . '-' . $version) {
+                    return true;
+                }
             }
         }
         return false;
