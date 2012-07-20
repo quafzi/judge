@@ -42,7 +42,7 @@ class SourceCodeComplexity implements JudgePlugin
      */
     protected function executePHPMessDetector($extensionPath)
     {
-        $executable = 'plugins/' . $this->name . '/lib/PHP/Depend/src/bin/phpmd';
+        $executable = 'vendor/phpmd/phpmd/src/bin/phpmd';
         $score = $this->settings->phpMessDetector->good;
         $mdResults = array();
         exec(sprintf($executable . ' "%s" "%s" "%s"', $extensionPath, 'text', $this->settings->phpMessDetector->useRuleSets), $mdResults);
@@ -73,7 +73,7 @@ class SourceCodeComplexity implements JudgePlugin
      */
     protected function executePHPDepend($extensionPath)
     {
-        $executable = 'plugins/' . $this->name . '/lib/PHP/Depend/src/bin/phpdepend';
+        $executable = 'vendor/pdepend/pdepend/src/bin/pdepend';
         $metricViolations = 0;
         $tempXml = $this->settings->phpDepend->tmpXmlFilename;
         $usedMetrics = $this->settings->phpDepend->useMetrics->toArray();
@@ -107,7 +107,7 @@ class SourceCodeComplexity implements JudgePlugin
      */
     protected function executePHPCpd($extensionPath)
     {
-        $executable = 'plugins/' . $this->name . '/lib/PHP/Depend/src/bin/phpcpd';
+        $executable = 'vendor/EHER/PHPUnit/bin/phpcpd';
         $line = '';
         $cpdPercentage = 0;
         $scoreForPhpCpd = $this->settings->phpcpd->good;
