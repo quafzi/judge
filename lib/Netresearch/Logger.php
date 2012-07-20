@@ -185,7 +185,7 @@ class Logger
             }
         }
         foreach (self::getPassedChecks($extension) as $passedCheck) {
-            self::log('"%s" passed check "%s"', array($extension, $passedCheck));
+            self::log('"%s" passed check "%s" with score %s', array($extension, $passedCheck, self::$results[$extension][$passedCheck]['result']));
             if (array_key_exists('comments', self::$results[$extension][$passedCheck])) {
                 foreach (self::$results[$extension][$passedCheck]['comments'] as $comment) {
                     self::log('* ' . $comment);

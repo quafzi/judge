@@ -49,8 +49,18 @@ class SourceCodeComplexity implements JudgePlugin
         if ($this->settings->phpMessDetector->allowedIssues < count($mdResults)) {
             $score = $this->settings->phpMessDetector->bad;
             foreach ($mdResults as $issue) {
-                Logger::addComment($this->name, 'failed', $issue);
+                Logger::addComment(
+                    $extensionPath,
+                    $this->name,
+                    '<comment>Mess detector found an issue:</comment>' . $issue
+                );
             }
+        } else {
+            Logger::addComment(
+                $extensionPath,
+                $this->name,
+                '<info>Mess detector found ' . $count($mdResults) . 'only</info>' . $issue
+            );
         }
         return $score;
     }
@@ -73,9 +83,10 @@ class SourceCodeComplexity implements JudgePlugin
             if (in_array($metricName, $usedMetrics)
                 && $this->settings->phpDepend->{$metricName} < $metricValue) {
                 Logger::addComment(
-                    $this->extensionPath,
+                    $extensionPath,
                     $this->name,
-                    '<comment>Critical metric ' . $metricName . ' value: ' . $metricValue . '</comment>');
+                    '<comment>Critical metric ' . $metricName . ' value: ' . $metricValue . '</comment>'
+                );
                 ++ $metricViolations;
             }
         }
@@ -110,6 +121,11 @@ class SourceCodeComplexity implements JudgePlugin
         }
         $cpdPercentage = substr($line, 0, strpos($line, '%'));
         if ($this->settings->phpcpd->percentageGood < $cpdPercentage) {
+            Logger::addComment(
+                $extensionPath,
+                $this->name,
+                sprintf('<comment>Extension contains %s%% of duplicated code.</comment>', $cpdPercentage)
+            );
             $scoreForPhpCpd = $this->settings->phpcpd->bad;
         }
         return $scoreForPhpCpd;
