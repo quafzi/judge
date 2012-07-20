@@ -63,7 +63,8 @@ class SourceCodeComplexity implements JudgePlugin
     protected function executePHPDepend($extensionPath)
     {
         $pdResults = array();
-        exec(sprintf('pdepend --"%s" "%s"', 'summary-xml=sum.xml', $extensionPath));
+        $executable = 'plugins/' . $this->name . '/lib/PHP/Depend/src/bin/pdepend';
+        exec(sprintf($executable . ' --"%s" "%s"', 'summary-xml=sum.xml', $extensionPath));
         $xml = current(simplexml_load_file('sum.xml'));
         return $xml;
     }

@@ -7,3 +7,6 @@
 [submodule "plugins/PhpCompatibility/lib/PHP/CompatInfo"]
 	path = plugins/PhpCompatibility/lib/PHP/CompatInfo
 	url = git://github.com/llaville/php-compat-info.git
+[submodule "plugins/SourceCodeComplexity/lib/PHP/Depend"]
+	path = plugins/SourceCodeComplexity/lib/PHP/Depend
+	url = https://github.com/pdepend/pdepend.git
