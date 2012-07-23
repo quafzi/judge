@@ -7,11 +7,11 @@ Judge is a tool to examine Magento extensions regarding their qualitiy and compa
 Installation
 ============
 
-First of all you need Judge itself, of course. So you'll have to clone it:
+First of all you need Judge itself, of course. So you'll have to clone it recursively:
 
 ::
 
-    git clone git@gitorious.nr:tools/judge.git
+    git clone git@gitorious.nr:tools/judge.git --recursive
 
 Judge requires a lot of tools to evaluate extensions. For dependency management, we use Composer_. So you'll have to
 install it on your system:
@@ -57,7 +57,15 @@ You should see something like that:
     Writing lock file
     Generating autoload files
 
-That's all. Happy judging :)
+Though that is a bit strange, you probably need to call
+
+::
+
+    cd vendor/EHER/PHPUnit && ./build.sh && cd -
+
+to fetch some further dependencies...
+
+*That's all. Happy judging :)*
 
 Usage
 =====
