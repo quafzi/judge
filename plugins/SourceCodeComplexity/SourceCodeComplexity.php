@@ -77,7 +77,8 @@ class SourceCodeComplexity implements JudgePlugin
         $metricViolations = 0;
         $tempXml = $this->settings->phpDepend->tmpXmlFilename;
         $usedMetrics = $this->settings->phpDepend->useMetrics->toArray();
-        exec(sprintf($executable . ' --summary-xml="%s" "%s"', $tempXml, $extensionPath));
+        $command = sprintf($executable . ' --summary-xml="%s" "%s"', $tempXml, $extensionPath);
+        exec($command);
         $metrics = current(simplexml_load_file($tempXml));
         foreach ($metrics as $metricName => $metricValue) {
             if (in_array($metricName, $usedMetrics)
@@ -113,7 +114,8 @@ class SourceCodeComplexity implements JudgePlugin
         $scoreForPhpCpd = $this->settings->phpcpd->good;
         $minLines   = $this->settings->phpcpd->minLines;
         $minTokens  = $this->settings->phpcpd->minTokens;
-        exec(sprintf($executable . ' --min-lines "%s" --min-tokens "%s" --quiet "%s"', $minLines, $minTokens, $extensionPath), $output);
+        $command = sprintf($executable . ' --min-lines "%s" --min-tokens "%s" --quiet "%s"', $minLines, $minTokens, $extensionPath);
+        exec($command, $output);
         foreach ($output as $line) {
             if (false !== strpos($line, '% duplicated')) {
                 break;
