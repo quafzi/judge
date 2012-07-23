@@ -32,7 +32,7 @@ class CodeRuin implements JudgePlugin
         $foundTokens = array();
         foreach ($settings->criticals as $token) {
             $filesWithThatToken = array();
-            $command = 'grep -rEl "' . $token . '" ' . $extensionPath . '/app';
+            $command = 'grep -riEl "' . $token . '" ' . $extensionPath . '/app';
             exec($command, $filesWithThatToken, $return);
             if (0 < count($filesWithThatToken)) {
                 $score = $settings->bad;
