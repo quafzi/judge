@@ -80,6 +80,7 @@ class SourceCodeComplexity implements JudgePlugin
         $command = sprintf($executable . ' --summary-xml="%s" "%s"', $tempXml, $extensionPath);
         exec($command);
         $metrics = current(simplexml_load_file($tempXml));
+        Logger::setResultValue($extensionPath, $this->name, 'metrics', $metrics);
         foreach ($metrics as $metricName => $metricValue) {
             if (in_array($metricName, $usedMetrics)
                 && $this->settings->phpDepend->{$metricName} < $metricValue) {

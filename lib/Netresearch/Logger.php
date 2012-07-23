@@ -10,9 +10,9 @@ use \Exception as Exception;
 class Logger
 {
     const TYPE_COMMENT = 'comment';
-    
+
     const TYPE_NOTICE = 'info';
-    
+
     const TYPE_ERROR = 'error';
 
     const VERBOSITY_NONE   = 0;
@@ -24,11 +24,11 @@ class Logger
     const VERBOSITY_MAX    = 10;
 
     protected static $verbosity = self::VERBOSITY_MEDIUM;
-    
+
     protected static $output;
 
     protected static $results = array();
-    
+
     public static function setOutputInterface(OutputInterface $output)
     {
         self::$output = $output;
@@ -38,7 +38,7 @@ class Logger
     {
         self::$verbosity = $verbosity;
     }
-    
+
     protected static function writeln($message, array $args = array(), $type = null)
     {
         if (self::VERBOSITY_NONE === self::$verbosity) {
@@ -66,12 +66,12 @@ class Logger
             : vsprintf("<$type>$message</$type>", $args)
         );
     }
-    
+
     public static function log($message, array $args = array(), $type=null)
     {
         self::writeln($message, $args, $type);
     }
-    
+
     public static function comment($message, array $args = array())
     {
         self::writeln($message, $args, self::TYPE_COMMENT);
@@ -145,11 +145,11 @@ class Logger
 
     /**
      * set a result value
-     * 
-     * @param string $extension 
-     * @param string $check 
-     * @param string $name 
-     * @param mixed $value 
+     *
+     * @param string $extension
+     * @param string $check
+     * @param string $name
+     * @param mixed $value
      * @return void
      */
     public static function setResultValue($extension, $check, $name, $value)
@@ -228,17 +228,18 @@ class Logger
 
     /**
      * get results array
-     * 
-     * @param string $check 
+     *
+     * @param string $extension 
+     * @param string $check
      * @return array
      */
-    public static function getResults($check=null)
+    public static function getResults($extension, $check=null)
     {
         if (is_null($check)) {
-            return self::$results;
+            return self::$results[$extension];
         }
-        if (array_key_exists($check, self::$results)) {
-            return self::$results[$check];
+        if (array_key_exists($check, self::$results[$extension])) {
+            return self::$results[$extension][$check];
         }
     }
 }
