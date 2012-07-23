@@ -9,6 +9,10 @@ class CheckComments implements JudgePlugin
 {
     protected $config;
     protected $settings;
+    protected $ncloc = 0;
+    protected $cloc = 0;
+
+
 
 
     public function __construct(Config $config)
@@ -29,8 +33,13 @@ class CheckComments implements JudgePlugin
         $lowerBoundary = $this->settings->lowerBoundary;
         $upperBoundary = $this->settings->upperBoundary;
         $clocToNclocRatio = $this->getClocToNclocRatio($extensionPath);
-        Logger::addComment($extensionPath, $this->name, '<comment> calculated ratio of: </comment>' . $clocToNclocRatio);
+        Logger::addComment($extensionPath, $this->name, '<comment>calculated cloc to ncloc ratio of</comment>' . $clocToNclocRatio);
         if ($clocToNclocRatio <= $lowerBoundary || $clocToNclocRatio >= $upperBoundary) {
+            $score = $this->settings->bad;
+        }
+        $unfinishedCodeToNclocRatio = $this->getUnfinishedCodeToNclocRatio($extensionPath);
+        Logger::addComment($extensionPath, $this->name, '<comment>calculated unfinished code to ncloc ratio</comment> ' . $unfinishedCodeToNclocRatio);
+        if ($this->settings->allowedUnfinishedCodeToNclocRatio < $unfinishedCodeToNclocRatio) {
             $score = $this->settings->bad;
         }
         Logger::setScore($extensionPath, $this->name, $score);
@@ -50,12 +59,26 @@ class CheckComments implements JudgePlugin
         $ncloc = 0;
         $cloc = 0;
         $metrics = $this->getMetrics($extensionPath);
-        $ncloc = $metrics['ncloc'];
-        $cloc = $metrics['cloc'];
+        $this->ncloc = $metrics['ncloc'];
+        $this->cloc = $metrics['cloc'];
         if ((!is_numeric($ncloc) || !is_numeric($cloc)) && $ncloc <= 0) {
             throw new Exception('Number of code lines is not numeric or 0? Please check extension path!');
         }
-        return $cloc / $ncloc;
+        return $this->cloc / $this->ncloc;
+    }
+
+
+    protected function getUnfinishedCodeToNclocRatio($extensionPath)
+    {
+        $unfinishedCode = 0;
+        $precalculatedResults = Logger::getResults($extensionPath, 'CodeRuin');
+        if (!is_null($precalculatedResults)
+            && array_key_exists('resultValue', $precalculatedResults)) {
+            foreach ($precalculatedResults['resultValue'] as $key => $value) {
+                $unfinishedCode += $value;
+            }
+        }
+        return $unfinishedCode / $this->ncloc;
     }
 
 
