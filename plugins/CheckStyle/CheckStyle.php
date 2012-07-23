@@ -35,20 +35,25 @@ class CheckStyle implements JudgePlugin
         $score          = $this->settings->good;
         $standardToUse  = $this->settings->standardToUse;
         $csResults      = array();
-        exec(sprintf($executable . ' --standard="%s" "%s"', $standardToUse, $extensionPath), $csResults);
+        $command = sprintf(
+            $executable . ' --standard="%s" "%s"',
+            $standardToUse,
+            $extensionPath
+        );
+        exec($command, $csResults);
         $csResults = $this->getClearedResults($csResults);
         // more issues found than allowed -> log them
         if ($this->settings->allowedIssues < sizeof($csResults)) {
             $score = $this->settings->bad;
             foreach ($csResults as $issue) {
-                $this->addToUniqueIssues($issue);
                 Logger::addComment(
                     $extensionPath,
                     $this->name,
-                    '<comment>PHPCS found a violation of coding standard ' . $standardToUse . ':</comment>' . $issue
+                    '<comment>PHPCS found issue:</comment>' . $issue
                 );
+                $this->addToUniqueIssues($issue);
             }
-            //@TODO: log unique issues
+            $this->logUniqueIssues();
         } else {
             Logger::addComment(
                 $extensionPath,
@@ -82,7 +87,8 @@ class CheckStyle implements JudgePlugin
     }
 
     /**
-     * adds issue to unique issues
+     * counts the unique issues
+     *
      * @param string $issue
      */
     protected function addToUniqueIssues($issue)
@@ -90,7 +96,14 @@ class CheckStyle implements JudgePlugin
         $issueData = explode('|', $issue);
         if (3 == count($issueData)) {
             $issueClass     = trim($issueData[1]);
-            $issueMessage   = substr(trim($issueData[2]), 0, strpos($issueData[2], ';'));
+            $issueMessage = trim($issueData[2]);
+            if (false !== strpos($issueData[2], ';')) {
+                $issueMessage = substr(
+                    $issueMessage,
+                    0,
+                    strpos($issueMessage, ';')
+                );
+            }
             if (false === array_key_exists($issueClass, $this->uniqueIssues)) {
                 $this->uniqueIssues[$issueClass] = array();
             }
@@ -99,6 +112,25 @@ class CheckStyle implements JudgePlugin
             }
             if (true === array_key_exists($issueMessage, $this->uniqueIssues[$issueClass])) {
                 $this->uniqueIssues[$issueClass][$issueMessage] ++;
+            }
+        }
+    }
+
+    /**
+     * creates a summaritze of the unique issues
+     */
+    protected function logUniqueIssues()
+    {
+        foreach ($this->uniqueIssues as $issueType => $uniqueIssues) {
+            foreach ($uniqueIssues as $message => $count) {
+                $comment = '<comment>PHPCS found a violation of type ' .
+                    $issueType . ' with message:</comment> ' . $message .
+                    ' ' . $count . ' times.';
+                Logger::addComment(
+                    $extensionPath,
+                    $this->name,
+                    $comment
+                );
             }
         }
     }
