@@ -143,6 +143,29 @@ class Logger
         self::$results[$extension][$check]['failed'] = $score < array_sum($result['range'])/2;
     }
 
+    /**
+     * set a result value
+     * 
+     * @param string $extension 
+     * @param string $check 
+     * @param string $name 
+     * @param mixed $value 
+     * @return void
+     */
+    public static function setResultValue($extension, $check, $name, $value)
+    {
+        if (false == array_key_exists($extension, self::$results)) {
+            self::$results[$extension] = array();
+        }
+        if (false == array_key_exists($check, self::$results[$extension])) {
+            self::$results[$extension][$check] = array();
+        }
+        if (false == array_key_exists('resultValue', self::$results[$extension][$check])) {
+            self::$results[$extension][$check]['resultValue'] = array();
+        }
+        self::$results[$extension][$check]['resultValue'][$name] = $value;
+    }
+
     public static function getScore($extension)
     {
         $score = 0;
@@ -201,5 +224,21 @@ class Logger
             $message = sprintf('<error>Extension "%s" failed evaluation: %d</error>', $extension, $score);
         }
         self::$output->writeln($message);
+    }
+
+    /**
+     * get results array
+     * 
+     * @param string $check 
+     * @return array
+     */
+    public static function getResults($check=null)
+    {
+        if (is_null($check)) {
+            return self::$results;
+        }
+        if (array_key_exists($check, self::$results)) {
+            return self::$results[$check];
+        }
     }
 }
