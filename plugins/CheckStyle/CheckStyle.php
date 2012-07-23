@@ -30,6 +30,7 @@ class CheckStyle implements JudgePlugin
      */
     public function execute($extensionPath)
     {
+        $this->extensionPath = $extensionPath;
         $score          = 0;
         $executable     = 'vendor/zerkalica/PHP_CodeSniffer/scripts/phpcs';
         $score          = $this->settings->good;
@@ -125,9 +126,9 @@ class CheckStyle implements JudgePlugin
             foreach ($uniqueIssues as $message => $count) {
                 $comment = '<comment>PHPCS found a violation of type ' .
                     $issueType . ' with message:</comment> ' . $message .
-                    ' ' . $count . ' times.';
+                    ' (' . $count . ' times).';
                 Logger::addComment(
-                    $extensionPath,
+                    $this->extensionPath,
                     $this->name,
                     $comment
                 );
