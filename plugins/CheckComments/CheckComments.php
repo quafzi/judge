@@ -42,6 +42,7 @@ class CheckComments implements JudgePlugin
         if ($this->settings->allowedUnfinishedCodeToNclocRatio < $unfinishedCodeToNclocRatio) {
             $score = $this->settings->bad;
         }
+        Logger::success('Registered good comment count in ' . $extensionPath);
         Logger::setScore($extensionPath, $this->name, $score);
         return $score;
     }
