@@ -6,10 +6,19 @@ class Extension
     protected $extensionPath;
 
     protected $usedClasses;
+    protected $usedMethods;
 
     public function __construct($extensionPath)
     {
         $this->extensionPath = $extensionPath;
+    }
+
+    public function getUsedMagentoMethods()
+    {
+        require 'vendor/nikic/php-parser/lib/bootstrap.php';
+        $this->usedMethods = new Methods();
+        $this->addMethods($this->extensionPath);
+        return $this->usedMethods;
     }
 
     public function getUsedMagentoClasses()
@@ -21,15 +30,14 @@ class Extension
         $this->addClassesByRegexp($extendsToken, $extendedClassesRegexp);
 
         $factoryTypes = array(
-            'Block'         => 'app/code/*/*/*/Block',
-            'Model'         => 'app/code/*/*/*/Model',
-            'ResourceModel' => 'app/code/*/*/*/Model/Mysql4'
+            'Block'         => 'Block',
+            'Model'         => 'Model',
+            'ResourceModel' => 'Model/Mysql4'
         );
         foreach ($factoryTypes as $factoryType=>$filePathPattern) {
             $factoryRegexp = '/Mage\W*::\W*get' . $factoryType . '\W*\(\W*["\'](.*)["|\']\"*\)/mU';
             $this->addClassesByRegexp($factoryType, $factoryRegexp, $filePathPattern);
         }
-        die(var_dump(__FILE__ . ' on line ' . __LINE__ . ':', $this->usedClasses));
 
         return $this->usedClasses;
     }
@@ -50,10 +58,11 @@ class Extension
             $content = file_get_contents($filePath);
             preg_match($regexp, $content, $detailedMatches);
             if (1 < count($detailedMatches)) {
-                if ($this->isExtensionClass($detailedMatches[1], $filePathPattern)) {
+                $class = new Klass($detailedMatches[1], str_replace('/', '_', $filePathPattern));
+                if ($class->isExtensionClass($detailedMatches[1], $filePathPattern, $this->extensionPath)) {
                     continue;
                 }
-                $this->usedClasses->add($this->getMagentoClassName($detailedMatches[1], $token));
+                $this->usedClasses->add($class);
             }
         }
     }
@@ -64,39 +73,63 @@ class Extension
         return (0 < preg_match('~app/code/.*/.*/Test/~u', $filePath));
     }
 
-    protected function isExtensionClass($identifier, $filePathPattern)
+    protected function addMethods($path)
     {
-        if (0 < preg_match('/^([a-zA-Z0-9]+_)+[a-zA-Z0-9]+$/', $identifier)) {
-            /* we got a class name */
-            $className = $identifier;
-            $token = 'class ' . $className;
-            $command = 'grep -rEl "' . $token . '" ' . $this->extensionPath . '/app';
-            exec($command, $filesWithThatToken, $return);
-        } else {
-            list($extensionName, $class) = explode('/', $identifier);
-            $classPathItems = explode('_', $class);
-            foreach ($classPathItems as $pathItem) {
-                $filePathPattern .= '/' . ucfirst($pathItem);
+        $parser = new \PHPParser_Parser(new \PHPParser_Lexer);
+        foreach (glob($path . '/*') as $item) {
+            if (is_dir($item)) {
+                $this->addMethods($item);
             }
-            $filePathPattern .= '.php';
-            $files = glob($this->extensionPath . '/' . $filePathPattern);
-            return (0 < count($files));
+            if (is_file($item) && is_readable($item)) {
+                if ($this->isUnitTestFile($item)) {
+                    continue;
+                }
+                /* we assume that there are only php files */
+                if (substr($item, -6) == '.stmts') {
+                    unlink($item); continue;
+                }
+                try {
+                    $stmts = $parser->parse(file_get_contents($item));
+                    //file_put_contents($item . '.stmts', var_export($stmts, true));
+                    $numberOfMethodCalls = $this->collectMethodCalls($stmts);
+                } catch (\PHPParser_Error $e) {
+                    // no valid php
+                    continue;
+                }
+            }
         }
     }
 
-    protected function getMagentoClassName($identifier, $type)
+    /**
+     * collect method calls 
+     * 
+     * @param PHPParser_Node_Stmt $stmt 
+     * @return int Number of called methods
+     */
+    protected function collectMethodCalls($stmt, $debug=false)
     {
-        if (0 < preg_match('/^([a-zA-Z0-9]+_)+[a-zA-Z0-9]+$/', $identifier)) {
-            return $identifier;
+        $numberOfMethodCalls = 0;
+        if (is_array($stmt)) {
+            foreach ($stmt as $subNode) {
+                $numberOfMethodCalls += $this->collectMethodCalls($subNode);
+            }
         }
-        list($extensionName, $class) = explode('/', $identifier);
-        $className = 'Mage_' . ucfirst($extensionName) . '_' . ucfirst($type);
-
-        $classPathItems = explode('_', $class);
-        foreach ($classPathItems as $pathItem) {
-            $className .= '_' . ucfirst($pathItem);
+        if (is_object($stmt)) {
+            foreach ($stmt->getSubNodeNames() as $name) {
+                $numberOfMethodCalls += $this->collectMethodCalls($stmt->$name);
+            }
         }
-        return $className;
+        if ($stmt instanceof \PHPParser_Node_Expr_MethodCall
+            || $stmt instanceof \PHPParser_Node_Expr_StaticCall
+        ) {
+            $method = new Method(
+                $stmt->name,
+                $stmt->args,
+                null
+            );
+            $this->usedMethods->add($method);
+            ++$numberOfMethodCalls;
+        }
+        return $numberOfMethodCalls;
     }
 }
-

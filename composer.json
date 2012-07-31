@@ -5,7 +5,8 @@
         "pdepend/pdepend": "dev-master",
         "eher/phpunit": "dev-master",
         "phpmd/phpmd": "dev-master",
-        "zerkalica/PHP_Codesniffer": "dev-master"
+        "zerkalica/PHP_Codesniffer": "dev-master",
+        "nikic/php-parser": "dev-master"
     },
     "authors": [
         {

@@ -24,33 +24,20 @@ class MageCompatibility implements JudgePlugin
         $supportedVersions = array();
 
         $extension = new Extension($this->extensionPath);
+        $methods = $extension->getUsedMagentoMethods();
         $classes = $extension->getUsedMagentoClasses();
 
-        foreach ($this->getTagFileNames() as $tagFileName) {
-            $edition = $this->getEdition($tagFileName);
-            $version = $this->getVersion($tagFileName);
-            Logger::log('Evaluating compatibility to ' . $this->getReadableVersionString($edition, $version));
-
-            $classes->compareToMagentoTags($tagFileName);
-
-            $incompatibilities = $this->getIncompatibilities($tagFileName);
-
-            if (0 < $incompatibilities->count()) {
-                Logger::addComment(
-                    $extensionPath,
-                    $this->name,
-                    sprintf(
-                        'There are %d incompatibilities to %s.',
-                        $incompatibilities->count(),
-                        $this->getReadableVersionString($edition, $version)
-                    )
-                );
-            } else {
-                $supportedVersions[$this->getReadableVersionString($edition, $version)] = $incompatibilities;
-            }
-        }
-        Logger::success('Supported Magento versions: ' . implode(', ', array_keys($supportedVersions)));
-        exit;
+        Logger::addComment(
+            $extensionPath,
+            $this->name,
+            sprintf(
+                'Extension uses %d classes and %d methods of Magento core',
+                $classes->count(),
+                $methods->count()
+            )
+        );
+        Logger::setScore($extensionPath, current(explode('\\', __CLASS__)), $this->settings->bad);
+        return $this->settings->bad;
     }
 
     protected function getTagFileNames()
@@ -74,26 +61,5 @@ class MageCompatibility implements JudgePlugin
     protected function getReadableVersionString($edition, $version)
     {
         return $edition . ' ' . $version;
-    }
-
-    protected function getIncompatibilities($tagFileName)
-    {
-        $incompatibilities = new Incompatibilities();
-
-        $usedClasses = $extension->getUsedMagentoClasses();
-        $usedClasses->removeByTagFile($tagFileName);
-        $incompatibilities->setClasses($usedClasses);
-        /*
-
-        $usedConstants = $this->getUsedMagentoConstants();
-        $usedConstants->removeByTagFile($tagFileName);
-        $incompatibilities->setConstants($usedConstants);
-
-        $usedMethods = $this->getUsedMagentoMethods();
-        $usedMethods->removeByTagFile($tagFileName);
-        $incompatibilities->setMethods($usedMethods);
-         */
-
-        return $incompatibilities;
     }
 }

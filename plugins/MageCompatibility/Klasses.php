@@ -11,9 +11,9 @@ class Klasses
      * @param string $name Name of the class
      * @return Klasses
      */
-    public function add($name)
+    public function add(Klass $class)
     {
-        $this->classes[$name] = new Klass($name);
+        $this->classes[$class->getName()] = $class;
         return $this;
     }
 
@@ -23,5 +23,10 @@ class Klasses
         foreach ($this->classes as $class) {
             die(var_dump(__FILE__ . ' on line ' . __LINE__ . ':', $class));
         }
+    }
+
+    public function count()
+    {
+        return count($this->classes);
     }
 }
