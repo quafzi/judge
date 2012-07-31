@@ -6,7 +6,8 @@
         "eher/phpunit": "dev-master",
         "phpmd/phpmd": "dev-master",
         "zerkalica/PHP_Codesniffer": "dev-master",
-        "nikic/php-parser": "dev-master"
+        "nikic/php-parser": "dev-master",
+        "dg/dibi": "dev-master"
     },
     "authors": [
         {
