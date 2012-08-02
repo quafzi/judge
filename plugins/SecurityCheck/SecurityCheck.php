@@ -33,12 +33,12 @@ class SecurityCheck implements JudgePlugin
         $this->extensionPath = $extensionPath;
         $settings = $this->config->plugins->{$this->name};
         $score = $settings->good;
-//        if ($settings->allowedRequestParams <= $this->checkForRequestParams($extensionPath)) {
-//            $score = $settings->bad;
-//        }
-//        if ($settings->allowedMissingEscaping <= $this->checkForEscaping($extensionPath)) {
-//            $score = $settings->bad;
-//        }
+        if ($settings->allowedRequestParams <= $this->checkForRequestParams($extensionPath)) {
+            $score = $settings->bad;
+        }
+        if ($settings->allowedMissingEscaping <= $this->checkForEscaping($extensionPath)) {
+            $score = $settings->bad;
+        }
         if ($settings->allowedSQLQueries <= $this->checkForSQLQueries($extensionPath)) {
             $score = $settings->bad;
         }
@@ -60,7 +60,7 @@ class SecurityCheck implements JudgePlugin
         $foundTokens = 0;
         foreach ($this->settings->requestParamsPattern as $requestPattern) {
             $filesWithThatToken = array();
-            $command = 'grep -ri "' . $requestPattern . '" ' . $extensionPath . '/app';
+            $command = 'grep -riEl "' . $requestPattern . '" ' . $extensionPath . '/app';
             exec($command, $filesWithThatToken, $return);
             if (0 < count($filesWithThatToken)) {
                 Logger::addComment($extensionPath, $this->name, sprintf(
@@ -86,7 +86,7 @@ class SecurityCheck implements JudgePlugin
         $foundTokens = 0;
         foreach ($this->settings->unescapedOutputPattern as $unescapedOutputPattern) {
             $filesWithThatToken = array();
-            $command = 'grep -ri "' . $unescapedOutputPattern . '" ' . $extensionPath . '/app';
+            $command = 'grep -riEl "' . $unescapedOutputPattern . '" ' . $extensionPath . '/app';
             exec($command, $filesWithThatToken, $return);
             if (0 < count($filesWithThatToken)) {
                 Logger::addComment($extensionPath, $this->name, sprintf(
@@ -111,7 +111,7 @@ class SecurityCheck implements JudgePlugin
         $foundTokens = 0;
         foreach ($this->settings->sqlQueryPattern as $sqlQueryPattern) {
             $filesWithThatToken = array();
-            $command = 'grep -ri "' . $sqlQueryPattern . '" ' . $extensionPath . '/app';
+            $command = 'grep -riEl "' . $sqlQueryPattern . '" ' . $extensionPath . '/app';
             echo $command . PHP_EOL;
             exec($command, $filesWithThatToken, $return);
             if (0 < count($filesWithThatToken)) {
