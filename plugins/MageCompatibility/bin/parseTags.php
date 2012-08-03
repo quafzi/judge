@@ -39,7 +39,7 @@ class TagParser
             }
             list($tag, $path, $codeLine, $type, $sourceLineNumber) = explode("\t", $line);
             switch ($type) {
-                case 'c': 
+                case 'c':
                     $this->addClass($tag, $path, $codeLine);
                     break;
                 case 'f':
@@ -50,13 +50,53 @@ class TagParser
 
     protected function addClass($tag, $path, $codeLine)
     {
-        $data = array('name' => $tag);
-        $classes = dibi::query('SELECT * FROM [classes] WHERE name = %s', $tag)->fetchAll();
+        $data = array(
+            'name' => $tag,
+            'path' => $path
+        );
+        $signatureData = array(
+            'type'          => 'class',
+            'definition'    => $tag
+        );
+        $classes = dibi::query(
+            'SELECT *
+             FROM [classes] c
+             INNER JOIN [class_signature] cs ON c.id = cs.class_id
+             INNER JOIN [signature] s ON s.id = cs.signature_id
+             WHERE name = %s AND path = %s',
+            $tag,
+            $path
+        )->fetchAll();
         if (0 == count($classes)) {
             dibi::query('INSERT INTO [classes] %v', $data);
+            $class_id = dibi::getInsertId();
+            dibi::query('INSERT INTO [signature] %v', $signatureData);
+            $signature_id = dibi::getInsertId();
+            dibi::query('INSERT INTO [class_signature] %v', array('class_id' => $class_id, 'signature_id' => $signature_id));
         } else {
-            die(var_dump(__FILE__ . ' on line ' . __LINE__ . ':', $classes));
         }
         /* @TODO: check/add signature */
     }
+
+
+    protected function addMethod($tag, $path, $codeLine)
+    {
+        $methods = dibi::query(
+                    'SELECT *
+                    FROM [methods] m
+                    INNER JOIN [classes] c
+                    WHERE m.name = %s AND c.path = %s',
+                    $tag, $path)
+            ->fetch();
+        if ($methods == false) {
+            $class = dibi::query('SELECT id FROM [classes] c WHERE c.path = %s', $path)
+                ->fetch();
+            $methodData = array(
+                'name'      => $tag,
+                'class_id'  => $class['id']
+            );
+            dibi::query('INSERT INTO [methods] %v', $methodData);
+        }
+    }
+
 }
