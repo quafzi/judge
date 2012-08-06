@@ -9,7 +9,8 @@ dibi::connect(array(
 dibi::query(
     'CREATE TABLE IF NOT EXISTS [classes] (
         [id] INTEGER NOT NULL PRIMARY KEY,
-        [name] VARCHAR(100) NOT NULL)'
+        [name] VARCHAR(100) NOT NULL,
+        [path] VARCHAR(512) NOT NULL)'
 );
 
 dibi::query(

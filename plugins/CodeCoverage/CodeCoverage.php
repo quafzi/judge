@@ -26,6 +26,7 @@ class CodeCoverage implements JudgePlugin
      */
     public function execute($extensionPath)
     {
+        $this->setUpEnv();
         $score = $this->settings->good;
         $score = $this->evaluateTestCoverage($extensionPath . DIRECTORY_SEPARATOR);
         Logger::setScore($extensionPath, $this->name, $score);
@@ -66,6 +67,7 @@ class CodeCoverage implements JudgePlugin
                         $this->name,
                         sprintf('<comment>Extension has a code coverage of "%d" for type "%s"</comment>', $codeCoverages[$codeCoverageType], $codeCoverageType)
                     );
+                    Logger::notice(sprintf('<comment>Extension has a code coverage of "%d" for type "%s"</comment>', $codeCoverages[$codeCoverageType], $codeCoverageType));
                     $score = $this->settings->bad;
                 }
             }
@@ -80,9 +82,8 @@ class CodeCoverage implements JudgePlugin
                     $score = $this->settings->bad;
                 }
                 foreach ($notCoveredClasses as $notCoveredClass) {
-                    Logger::addComment(
-                        $extensionPath,
-                        $this->name,
+
+                    Logger::notice(
                         '<comment>Following class is not covered by any test: ' . $notCoveredClass . ' </comment>'
                     );
                 }
@@ -202,6 +203,25 @@ class CodeCoverage implements JudgePlugin
             $ratio = $covered / $total;
         }
         return $ratio;
+    }
+
+
+    protected function setUpEnv()
+    {
+        if ($this->settings->useJumpstorm == true) {
+            Logger::notice('Setting Up Magento environment via jumpström');
+            $iniFile = $this->settings->jumpstormIni;
+            $installMagentoCommand      = 'magento -c ' . $iniFile;
+            $installUnitTestingCommand  = 'unittesting -c ' . $iniFile;
+            $installExtensionCommand    = 'extensions -c ' . $iniFile;
+            $executable = 'vendor/netresearch/jumpstorm/jumpstorm';
+            exec(sprintf('%s %s', $executable, $installMagentoCommand), $output);
+            Logger::notice(implode(PHP_EOL, $output));
+            exec(sprintf('%s %s', $executable, $installUnitTestingCommand), $output);
+            Logger::notice(implode(PHP_EOL, $output));
+            exec(sprintf('%s %s', $executable, $installExtensionCommand), $output);
+            Logger::notice(implode(PHP_EOL, $output));
+        }
     }
 
 }

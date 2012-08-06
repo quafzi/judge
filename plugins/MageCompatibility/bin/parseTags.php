@@ -102,19 +102,29 @@ class TagParser
      */
     protected function addClass($name, $path, $codeLine)
     {
-        $classId     = $this->fetchClassId($name);
-        $signatureId = $this->fetchSignatureId('c', trim($codeLine), $path);
-        $relation = dibi::query(
-            'SELECT * FROM [class_signature] WHERE class_id = %s and signature_id = %s',
-            $classId,
-            $signatureId
-        )->fetch();
-        if (false == $relation) {
-            $data = array(
-                'class_id'     => $classId,
-                'signature_id' => $signatureId
-            );
-            dibi::query('INSERT INTO [class_signature] %v', $data);
+        $data = array(
+            'name' => $name,
+            'path' => $path
+        );
+        $signatureData = array(
+            'type'       => 'class',
+            'definition' => $codeLine
+        );
+        $classes = dibi::query(
+            'SELECT *
+             FROM [classes] c
+             INNER JOIN [class_signature] cs ON c.id = cs.class_id
+             INNER JOIN [signature] s ON s.id = cs.signature_id
+             WHERE name = %s AND path = %s',
+            $name,
+            $path
+        )->fetchAll();
+        if (0 == count($classes)) {
+            dibi::query('INSERT INTO [classes] %v', $data);
+            $classId = dibi::getInsertId();
+            dibi::query('INSERT INTO [signatures] %v', $signatureData);
+            $signatureId = dibi::getInsertId();
+            dibi::query('INSERT INTO [class_signature] %v', array('class_id' => $classId, 'signature_id' => $signatureId));
         }
     }
 
@@ -123,15 +133,32 @@ class TagParser
         $this->addClass($name, $path, $codeLine);
     }
 
+    /**
+     * addConstant
+     * 
+     * @param mixed $name
+     * @param mixed $path
+     * @param mixed $codeLine
+     * @return void
+     * @TODO
+     */
     protected function addConstant($name, $path, $codeLine)
     {
     }
 
+    /**
+     * add method
+     *
+     * @param mixed $tag
+     * @param mixed $path
+     * @param mixed $codeLine
+     * @return void
+     */
     protected function addMethod($name, $path, $codeLine)
     {
         $className   = $this->getClassNameForPath($path);
         $classId     = $this->fetchClassId($className);
-        $methodId    = $this->fetchMethodId($name);
+        $methodId    = $this->fetchMethodId($name, $classId);
         $signatureId = $this->fetchSignatureId('m', trim($codeLine), $path);
         $relation = dibi::query(
             'SELECT * FROM [method_signature] WHERE method_id = %s and signature_id = %s',
@@ -242,10 +269,13 @@ class TagParser
      * @param string $name 
      * @return int
      */
-    protected function fetchMethodId($name)
+    protected function fetchMethodId($name, $classId)
     {
-        $data = array('name' => $name);
-        $method = dibi::query('SELECT * FROM [methods] WHERE name = %s', $name)->fetch();
+        $data = array(
+            'name'     => $name,
+            'class_id' => $classId,
+        );
+        $method = dibi::query('SELECT * FROM [methods] WHERE name = %s AND class_id = %s', $name, $classId)->fetch();
         if (false == $method) {
             dibi::query('INSERT INTO [methods] %v', $data);
             return dibi::getInsertId();
@@ -310,4 +340,6 @@ class TagParser
         }
         return implode('_', $relevantParts);
     }
+
+
 }
