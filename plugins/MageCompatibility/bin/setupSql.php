@@ -2,34 +2,35 @@
 $basedir = realpath(dirname(__FILE__) . '/../../../');
 require_once $basedir . '/vendor/dg/dibi/dibi/dibi.php';
 dibi::connect(array(
-    'driver'   => 'sqlite3',
-    'database' => $basedir . '/plugins/MageCompatibility/var/tags.sqlite'
+    'driver'   => 'mysql',
+	'username' => 'root',
+	'database' => 'judge'
 ));
 
 dibi::query(
     'CREATE TABLE IF NOT EXISTS [classes] (
-        [id] INTEGER NOT NULL PRIMARY KEY,
+        [id] INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
         [name] VARCHAR(100) NOT NULL,
         [path] VARCHAR(512) NOT NULL)'
 );
 
 dibi::query(
     'CREATE TABLE IF NOT EXISTS [methods] (
-        [id] INTEGER  NOT NULL PRIMARY KEY,
+        [id] INTEGER  NOT NULL PRIMARY KEY AUTO_INCREMENT,
         [name] VARCHAR(100) NOT NULL,
         [class_id] INTEGER REFERENCES [classes](id))'
 );
 
 dibi::query(
     'CREATE TABLE IF NOT EXISTS [constants] (
-        [id] INTEGER  NOT NULL PRIMARY KEY,
+        [id] INTEGER  NOT NULL PRIMARY KEY AUTO_INCREMENT,
         [name] VARCHAR(100) NOT NULL,
         [class_id] INTEGER REFERENCES [classes](id))'
 );
 
 dibi::query(
     'CREATE TABLE IF NOT EXISTS [signatures] (
-        [id] INTEGER  NOT NULL PRIMARY KEY,
+        [id] INTEGER  NOT NULL PRIMARY KEY AUTO_INCREMENT,
         [type] VARCHAR(1) NOT NULL,
         [path] VARCHAR(1000) NOT NULL,
         [definition] VARCHAR(1000) NOT NULL)'
@@ -37,7 +38,7 @@ dibi::query(
 
 dibi::query(
     'CREATE TABLE IF NOT EXISTS [magento] (
-        [id] INTEGER  NOT NULL PRIMARY KEY,
+        [id] INTEGER  NOT NULL PRIMARY KEY AUTO_INCREMENT,
         [edition] VARCHAR(100) NOT NULL,
         [version] VARCHAR(100) NOT NULL)'
 );

@@ -104,7 +104,6 @@ class TagParser
     {
         $data = array(
             'name' => $name,
-            'path' => $path
         );
         $signatureData = array(
             'type'       => 'class',
@@ -114,10 +113,9 @@ class TagParser
             'SELECT *
              FROM [classes] c
              INNER JOIN [class_signature] cs ON c.id = cs.class_id
-             INNER JOIN [signature] s ON s.id = cs.signature_id
-             WHERE name = %s AND path = %s',
-            $name,
-            $path
+             INNER JOIN [signatures] s ON s.id = cs.signature_id
+             WHERE name = %s',
+            $name
         )->fetchAll();
         if (0 == count($classes)) {
             dibi::query('INSERT INTO [classes] %v', $data);
