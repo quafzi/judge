@@ -6,37 +6,34 @@
 if (2 != count($argv)) {
     die('Please submit exactly one param: The path to the Magento app directory' . PHP_EOL);
 }
-$pathToMagentoAppDir = $argv[1];
-if (substr($pathToMagentoAppDir, -1) != '/') {
-    $pathToMagentoAppDir .= '/';
+$pathToMagentoBaseDir = $argv[1];
+if (substr($pathToMagentoBaseDir, -1) != '/') {
+    $pathToMagentoBaseDir .= '/';
 }
-if (substr($pathToMagentoAppDir, -5) != '/app/') {
-    die('Please submit exactly one param: The path to the Magento app directory, which should endup with "/app/".' . PHP_EOL);
-}
-if (false === file_exists($pathToMagentoAppDir . 'Mage.php')) {
+if (false === file_exists($pathToMagentoBaseDir . '/app/Mage.php')) {
     die('Are you sure, there is a Magento? Couldn\'t find Mage.php!' . PHP_EOL);
 }
 
-$tagger = new Tagger($pathToMagentoAppDir);
+$tagger = new Tagger($pathToMagentoBaseDir);
 $tagger->run();
 
 class Tagger
 {
     protected $tagDir;
-    protected $pathToMagentoAppDir;
+    protected $pathToMagentoBaseDir;
     protected $edition;
     protected $version;
 
-    public function __construct($pathToMagentoAppDir)
+    public function __construct($pathToMagentoBaseDir)
     {
         $this->tagDir = dirname(__FILE__) . '/../var/tags/';
-        $this->pathToMagentoAppDir = $pathToMagentoAppDir;
-        $this->verifyMagento($pathToMagentoAppDir);
+        $this->pathToMagentoBaseDir = $pathToMagentoBaseDir;
+        $this->verifyMagento($pathToMagentoBaseDir);
     }
 
-    protected function verifyMagento($pathToMagentoAppDir)
+    protected function verifyMagento($pathToMagentoBaseDir)
     {
-        include $pathToMagentoAppDir . 'Mage.php';
+        include $pathToMagentoBaseDir . 'app/Mage.php';
 
         $this->edition = (method_exists('Mage', 'getEdition')) ? Mage::getEdition() : 'Community';
         $this->version = Mage::getVersion();
@@ -56,26 +53,31 @@ class Tagger
     public function run()
     {
         $command = sprintf(
-            'cd %s && ctags -R --languages=php --totals=yes --tag-relative=yes --PHP-kinds=+cf-v -h ".ph" --fields=+n -f tags .',
-            $this->pathToMagentoAppDir,
-            $this->pathToMagentoAppDir,
+            'cd %s && ctags -R --languages=php --totals=yes --tag-relative=yes --PHP-kinds=+cidf-v -h ".ph" --fields=+n -f tags .',
+            $this->pathToMagentoBaseDir,
+            $this->pathToMagentoBaseDir,
             $this->edition,
             $this->version
         );
 
         exec($command, $output);
 
-        rename($this->pathToMagentoAppDir . 'tags', $this->getRawTagFilePath());
+        rename($this->pathToMagentoBaseDir . 'tags', $this->getRawTagFilePath());
 
         $rawTagFile = fopen($this->getRawTagFilePath(), 'r');
         $tagFile = fopen($this->tagDir . $this->getTagFileName(), 'w');
         $tagFileLineNumber = 0;
         while ($line = fgets($rawTagFile)) {
             ++$tagFileLineNumber;
+            if (0 == strlen(trim($line))) {
+                // skip empty lines
+                continue;
+            }
             if ('!_T' == substr($line, 0,3)) {
                 // skip comment lines
                 continue;
             }
+            $line = preg_replace('/\/\^(\W*)(\w)/', '/^$2', $line);
             list($tag, $path, $codeLine, $type, $sourceLineNumber) = explode("\t", $line);
 
             if ('j' == $type) {
@@ -88,10 +90,10 @@ class Tagger
                 $codeLine = $this->getCompleteFunctionDefinition($path, $tag, $sourceLineNumber);
             }
 
-            fputs($tagFile, implode(
+            fputs($tagFile, trim(implode(
                 "\t",
                 array($tag, $path, $codeLine, $type, $sourceLineNumber)
-            ));
+            )) . "\n");
         }
         fclose($rawTagFile);
         unlink($this->getRawTagFilePath());
@@ -100,7 +102,7 @@ class Tagger
     protected function getCompleteFunctionDefinition($path, $tag, $sourceLineNumber)
     {
         $sourceLineNumber = (int) trim(str_replace('line:', '', $sourceLineNumber));
-        $sourceFile = fopen($this->pathToMagentoAppDir . $path, 'r');
+        $sourceFile = fopen($this->pathToMagentoBaseDir . $path, 'r');
         $currentLineNumber = 0;
         while(!feof($sourceFile))
         {
