@@ -85,8 +85,9 @@ class Tagger
                 continue;
             }
 
-            preg_match ('/,\\$\//', $codeLine, $incompleteLine);
-            if (count($incompleteLine)) {
+            $strippedCodeLine = preg_replace('/".*"/', '', $codeLine);
+            $strippedCodeLine = preg_replace('/\'.*\'/', '', $strippedCodeLine);
+            if (substr_count($strippedCodeLine, '(') !== substr_count($strippedCodeLine, ')')) {
                 $codeLine = $this->getCompleteFunctionDefinition($path, $tag, $sourceLineNumber);
             }
 
