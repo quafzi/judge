@@ -21,6 +21,10 @@ class TagParser
 {
     protected $tagFileName;
 
+    protected $version;
+    protected $edition;
+    protected $magentoId;
+
     protected $knownClasses=array();
 
     public function __construct($tagFileName) {
@@ -29,34 +33,281 @@ class TagParser
 
     public function run()
     {
+        $startedAt = time();
         $tagFile = fopen($this->tagFileName, 'r');
-        $tagFileLineNumber = 0;
-        while ($line = fgets($tagFile)) {
-            ++$tagFileLineNumber;
-            if ('!_T' == substr($line, 0,3)) {
-                // skip comment lines
-                continue;
-            }
-            list($tag, $path, $codeLine, $type, $sourceLineNumber) = explode("\t", $line);
-            switch ($type) {
-                case 'c': 
-                    $this->addClass($tag, $path, $codeLine);
-                    break;
-                case 'f':
-                    $this->addMethod($tag, $path, $codeLine);
+        $tagFileNameWithoutExt = str_replace('.tags', '', basename($this->tagFileName));
+        list($edition, $this->version) = explode('-', $tagFileNameWithoutExt);
+        $this->edition = ucfirst(substr($edition, 0, 1)) . 'E';
+        $types = array(
+            'c' => 'addClass',     // classes
+            'i' => 'addInterface', // interfaces
+            'd' => 'addConstant',  // constant definitions
+            'f' => 'addMethod',    // functions
+            /* tag types to be ignored
+            'v' => 'addVariable',  // variables               
+            'j' => 'addJavascript' // javascript functions
+             */
+        );
+        $done = 0;
+        exec('wc -l ' . $this->tagFileName, $wcOut);
+        $lines = (int) current($wcOut);
+        $ignore = 0;
+        foreach ($types as $currentType=>$call) {
+            rewind($tagFile);
+            $tagFileLineNumber = 0;
+            $ignore = 0;
+            while ($line = fgets($tagFile)) {
+                ++$tagFileLineNumber;
+                if ('!_T' == substr($line, 0,3)) {
+                    // skip comment lines
+                    ++$ignore;
+                    continue;
+                }
+                list($tag, $path, $codeLine, $type, $sourceLineNumber) = explode("\t", $line);
+                $codeLine = str_replace('/^', '', $codeLine);
+                $codeLine = str_replace('$/;"', '', $codeLine);
+
+                if (1 != strlen($type)) {
+                    echo "found invalid type \"$type\" on line $tagFileLineNumber";
+                    exit(1);
+                }
+                if ($currentType == $type) {
+                    $this->$call($tag, $path, $codeLine);
+                    ++$done;
+                    $called = $call;
+                } else {
+                    $called = "(skip $type)";
+                }
+                $timeLeft = '';
+                if (20 < $done) {
+                    $timeSpent = time() - $startedAt;
+                    $secondsLeft = round($lines * $timeSpent / $done);
+                    $timeLeft = ", approx. {$secondsLeft}s left";
+                }
+                $memusage = ', ' . round(memory_get_usage()/1000)/1000 . 'MB';
+                $percent = number_format(100 * $done / ($lines - $ignore), 3);
+                echo "\r  ➜ $done/" . ($lines-$ignore) . " done ($percent%$timeLeft$memusage, tag line $tagFileLineNumber): $called";
+
             }
         }
     }
 
-    protected function addClass($tag, $path, $codeLine)
+    /**
+     * add class to database
+     * 
+     * @param mixed $name 
+     * @param mixed $path 
+     * @param mixed $codeLine 
+     * @return void
+     */
+    protected function addClass($name, $path, $codeLine)
     {
-        $data = array('name' => $tag);
-        $classes = dibi::query('SELECT * FROM [classes] WHERE name = %s', $tag)->fetchAll();
-        if (0 == count($classes)) {
-            dibi::query('INSERT INTO [classes] %v', $data);
-        } else {
-            die(var_dump(__FILE__ . ' on line ' . __LINE__ . ':', $classes));
+        $classId     = $this->fetchClassId($name);
+        $signatureId = $this->fetchSignatureId('c', trim($codeLine), $path);
+        $relation = dibi::query(
+            'SELECT * FROM [class_signature] WHERE class_id = %s and signature_id = %s',
+            $classId,
+            $signatureId
+        )->fetch();
+        if (false == $relation) {
+            $data = array(
+                'class_id'     => $classId,
+                'signature_id' => $signatureId
+            );
+            dibi::query('INSERT INTO [class_signature] %v', $data);
         }
-        /* @TODO: check/add signature */
+    }
+
+    protected function addInterface($name, $path, $codeLine)
+    {
+        $this->addClass($name, $path, $codeLine);
+    }
+
+    protected function addConstant($name, $path, $codeLine)
+    {
+    }
+
+    protected function addMethod($name, $path, $codeLine)
+    {
+        $className   = $this->getClassNameForPath($path);
+        $classId     = $this->fetchClassId($className);
+        $methodId    = $this->fetchMethodId($name);
+        $signatureId = $this->fetchSignatureId('m', trim($codeLine), $path);
+        $relation = dibi::query(
+            'SELECT * FROM [method_signature] WHERE method_id = %s and signature_id = %s',
+            $methodId,
+            $signatureId
+        )->fetch();
+        if (false == $relation) {
+            $countOfParams = $this->getCountOfParams($codeLine);
+            $data = array(
+                'method_id'             => $methodId,
+                'signature_id'          => $signatureId,
+                'required_params_count' => $countOfParams['required'],
+                'optional_params_count' => $countOfParams['optional'],
+                'visibility'            => $this->getVisibility($codeLine)
+            );
+            dibi::query('INSERT INTO [method_signature] %v', $data);
+        }
+    }
+
+    protected function getCountOfParams($call)
+    {
+        $count = array(
+            'required' => 0,
+            'optional' => 0
+        );
+        preg_match('/(.*)\((.*)\)/', $call, $matches);
+        list ($call, $method, $params) = $matches;
+
+        if (strlen($params)) {
+            $params = explode(', ', $params);
+            $countOfRequiredParams = 0;
+            $countOfOptionalParams = 0;
+            foreach ($params as $param) {
+                if (false === strpos($param, '=')) {
+                    $count['required']++;
+                } else {
+                    $count['optional']++;
+                }
+            }
+        }
+        return $count;
+    }
+
+    protected function getVisibility($definition)
+    {
+        if (preg_match('/.*(public|protected|private).*function\ +(\w+)\W*\(/', $definition, $matches)) {
+            return $matches[1];
+        }
+    }
+
+    protected function assignSignatureToMagento($signatureId)
+    {
+        $magentoId = $this->fetchMagentoId();
+        $relation = dibi::query(
+            'SELECT * FROM [magento_signature] WHERE signature_id = %s AND magento_id = %s',
+            $signatureId,
+            $magentoId
+        )->fetch();
+        if (false == $relation) {
+            $data = array(
+                'signature_id' => $signatureId,
+                'magento_id'   => $magentoId
+            );
+            dibi::query('INSERT INTO [magento_signature] %v', $data);
+        }
+    }
+
+    protected function fetchMagentoId()
+    {
+        if (is_null($this->magentoId)) {
+            $this->magentoId = dibi::query(
+                'SELECT * FROM [magento] WHERE edition = %s AND version = %s',
+                $this->edition,
+                $this->version
+            )->fetchSingle();
+            if (false == $this->magentoId) {
+                $magento = array(
+                    'edition' => $this->edition,
+                    'version' => $this->version
+                );
+                dibi::query('INSERT INTO [magento] %v', $magento);
+                $this->magentoId = dibi::getInsertId();
+            }
+        }
+        return $this->magentoId;
+    }
+
+    /**
+     * create class if needed, return its id
+     * 
+     * @param string $name 
+     * @return int
+     */
+    protected function fetchClassId($name)
+    {
+        $data = array('name' => $name);
+        $class = dibi::query('SELECT * FROM [classes] WHERE name = %s', $name)->fetch();
+        if (false == $class) {
+            dibi::query('INSERT INTO [classes] %v', $data);
+            return dibi::getInsertId();
+        }
+        return $class->id;
+    }
+
+    /**
+     * create method if needed, return its id
+     * 
+     * @param string $name 
+     * @return int
+     */
+    protected function fetchMethodId($name)
+    {
+        $data = array('name' => $name);
+        $method = dibi::query('SELECT * FROM [methods] WHERE name = %s', $name)->fetch();
+        if (false == $method) {
+            dibi::query('INSERT INTO [methods] %v', $data);
+            return dibi::getInsertId();
+        }
+        return $method->id;
+    }
+
+    /**
+     * create signature if needed, return its id
+     * 
+     * @param char   $type 
+     * @param string $definition 
+     * @param string $path 
+     * @return int
+     */
+    protected function fetchSignatureId($type, $definition, $path)
+    {
+        $signature = dibi::query(
+            'SELECT * FROM [signatures] WHERE type = %s AND definition = %s AND path = %s',
+            $type,
+            $definition,
+            $path
+        )->fetch();
+        if (false == $signature) {
+            $data = array(
+                'type'       => $type,
+                'definition' => $definition,
+                'path'       => $path
+            );
+            dibi::query('INSERT INTO [signatures] %v', $data);
+            $signatureId = dibi::getInsertId();
+            $this->assignSignatureToMagento($signatureId);
+            return $signatureId;
+        }
+        return $signature->id;
+    }
+
+    public function getClassNameForPath($path)
+    {
+        /**
+         * lib/Zend/Foo/Bar.php
+         * app/code/core/Foo/Bar/Some/Path.php
+         */
+        $irrelevantPathParts = array(
+            'lib',
+            'app/code/core',
+            'app/code/community',
+            'app/code/local',
+            '.php'
+        );
+        foreach ($irrelevantPathParts as $part)
+        {
+            $path = str_replace($part, '', $path);
+        }
+        $relevantParts = explode('/', $path);
+        foreach ($relevantParts as $key=>$part) {
+            if (0 == strlen($part)) {
+                unset($relevantParts[$key]);
+            } else {
+                $relevantParts[$key] = ucfirst(trim($part));
+            }
+        }
+        return implode('_', $relevantParts);
     }
 }
