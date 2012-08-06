@@ -1,9 +1,16 @@
 <?php
 namespace MageCompatibility;
 
-class Klass
+class Klass extends Tag
 {
-    const TYPE_UNKNOWN = '-1';
+    const TYPE_UNKNOWN   = '-1';
+    const TAG_TYPE       = 'c';
+    const TABLE          = 'methods';
+    const RELATION_TABLE = 'method_signature';
+
+    protected $shortTagType = 'c';
+    protected $tagType      = 'class';
+    protected $table        = 'classes';
 
     protected $name;
 
@@ -21,6 +28,11 @@ class Klass
         if (false == empty($type)) {
             $this->setType($type);
         }
+    }
+
+    protected function getTableName()
+    {
+        return self::TABLE;
     }
 
     /**

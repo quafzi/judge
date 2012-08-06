@@ -2,8 +2,11 @@
 $basedir = realpath(dirname(__FILE__) . '/../../../');
 require_once $basedir . '/vendor/dg/dibi/dibi/dibi.php';
 dibi::connect(array(
-    'driver'   => 'sqlite3',
-    'database' => $basedir . '/plugins/MageCompatibility/var/tags.sqlite'
+    //'driver'   => 'sqlite3',
+    //'database' => $basedir . '/plugins/MageCompatibility/var/tags.sqlite'
+    'driver'   => 'mysql',
+	'username' => 'root',
+	'database' => 'judge'
 ));
 
 if (count($argv) < 2) {
@@ -123,6 +126,8 @@ class TagParser
             dibi::query('INSERT INTO [signatures] %v', $signatureData);
             $signatureId = dibi::getInsertId();
             dibi::query('INSERT INTO [class_signature] %v', array('class_id' => $classId, 'signature_id' => $signatureId));
+            $signatureId = dibi::getInsertId();
+            $this->assignSignatureToMagento($signatureId);
         }
     }
 

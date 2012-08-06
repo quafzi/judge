@@ -1,7 +1,7 @@
 <?php
 namespace MageCompatibility;
 
-class Methods
+class Methods extends Tags
 {
     protected $data = array();
 

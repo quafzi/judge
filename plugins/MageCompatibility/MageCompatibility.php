@@ -36,6 +36,24 @@ class MageCompatibility implements JudgePlugin
                 $methods->count()
             )
         );
+        
+        $magentoVersions = array();
+        foreach ($classes as $class) {
+            echo $class->getName() . PHP_EOL;
+            $class->setConfig($this->settings);
+            $magentoVersions += $class->getMagentoVersions();
+        }
+        foreach ($methods as $method) {
+            echo $method->getName() . PHP_EOL;
+            $method->setConfig($this->settings);
+            $magentoVersions += $method->getMagentoVersions();
+        }
+        Logger::addComment(
+            $extensionPath,
+            $this->name,
+            'Extension seems to support following Magento versions: ' . implode(', ', $magentoVersions)
+        );
+
         Logger::setScore($extensionPath, current(explode('\\', __CLASS__)), $this->settings->bad);
         return $this->settings->bad;
     }

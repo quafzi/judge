@@ -1,7 +1,7 @@
 <?php
 namespace MageCompatibility;
 
-class Method
+class Method extends Tag
 {
     const TYPE_MIXED   = 'mixed';
     const TYPE_UNKNOWN = 'unknown';
@@ -11,6 +11,10 @@ class Method
     const TYPE_FLOAT   = 'float';
     const TYPE_ARRAY   = 'array';
     const TYPE_STRING  = 'string';
+
+    protected $shortTagType = 'm';
+    protected $tagType      = 'method';
+    protected $table        = 'methods';
 
     protected $name;
     protected $params=array();
@@ -23,9 +27,24 @@ class Method
         $this->setContext($context);
     }
 
+    protected function getTableName()
+    {
+        return self::TABLE;
+    }
+
     public function setName($name)
     {
         $this->name = $name;
+    }
+
+    protected function getFieldsToSelect()
+    {
+        $fields = parent::getFieldsToSelect();
+        $fields[] = 'visibility';
+        $fields[] = 'required_params_count';
+        $fields[] = 'optional_params_count';
+        $fields[] = 'params';
+        return $fields;
     }
 
     public function setParams($params)

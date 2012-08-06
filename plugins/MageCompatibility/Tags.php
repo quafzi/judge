@@ -1,22 +1,10 @@
 <?php
 namespace MageCompatibility;
 
-class Klasses extends Tags
+class Tags implements \Iterator
 {
     protected $position = 0;
     protected $data = array();
-
-    /**
-     * add a class name
-     * 
-     * @param string $name Name of the class
-     * @return Klasses
-     */
-    public function add(Klass $class)
-    {
-        $this->data[] = $class;
-        return $this;
-    }
 
     public function count()
     {
@@ -38,11 +26,13 @@ class Klasses extends Tags
         return $this->position;
     }
         
-    function next() {
+    function next()
+    {
         ++$this->position;
     }
 
-    function valid() {
+    function valid()
+    {
         return isset($this->data[$this->position]);
     }
 }
