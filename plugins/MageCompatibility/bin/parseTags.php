@@ -86,7 +86,7 @@ class TagParser
                 }
                 $memusage = ', ' . round(memory_get_usage()/1000)/1000 . 'MB';
                 $percent = number_format(100 * $done / ($lines - $ignore), 3);
-                echo "\r  ➜ $done/" . ($lines-$ignore) . " done ($percent%$timeLeft$memusage, tag line $tagFileLineNumber): $called";
+                echo "\r  ➜ $done/" . ($lines-$ignore) . " done ($percent%$timeLeft$memusage, tag line $tagFileLineNumber): $called      ";
 
             }
         }
