@@ -112,7 +112,6 @@ class SecurityCheck implements JudgePlugin
         foreach ($this->settings->sqlQueryPattern as $sqlQueryPattern) {
             $filesWithThatToken = array();
             $command = 'grep -riEl "' . $sqlQueryPattern . '" ' . $extensionPath . '/app';
-            echo $command . PHP_EOL;
             exec($command, $filesWithThatToken, $return);
             if (0 < count($filesWithThatToken)) {
                 Logger::addComment($extensionPath, $this->name, sprintf(

@@ -33,25 +33,25 @@ class PerformanceCheck implements JudgePlugin
         $this->extensionPath = $extensionPath;
         $settings = $this->config->plugins->{$this->name};
         $score = $settings->good;
-        foreach ($this->settings->requestParamsPattern as $requestPattern) {
+        foreach ($this->settings->performanceKillerPattern as $performanceKiller) {
             $filesWithThatToken = array();
-            $command = 'grep -riEl "' . $requestPattern . '" ' . $extensionPath . '/app';
+            $command = 'grep -riEl "' . $performanceKiller . '" ' . $extensionPath . '/app';
             exec($command, $filesWithThatToken, $return);
             if (0 < count($filesWithThatToken)) {
                 $score = $this->settings->bad;
                 Logger::addComment($extensionPath, $this->name, sprintf(
                     'Found an indicator of using direct request params: "%s" at %s',
-                    $requestPattern,
+                    $performanceKiller,
                     implode(';' . PHP_EOL, $filesWithThatToken)
                 ));
                 $foundTokens = $foundTokens + count($filesWithThatToken);
             }
-            Logger::setResultValue($extensionPath, $this->name, $requestPattern, count($filesWithThatToken));
+            Logger::setResultValue($extensionPath, $this->name, $performanceKiller, count($filesWithThatToken));
         }
         if ($score == $this->settings->good) {
             Logger::success('No potential performance issues found ' . $extensionPath);
         }
-
+        Logger::setScore($extensionPath, $this->name, $score);
         return $score;
     }
 }
