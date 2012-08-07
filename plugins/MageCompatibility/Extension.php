@@ -90,8 +90,13 @@ class Extension
                 }
                 try {
                     $stmts = $parser->parse(file_get_contents($item));
+                    $serializer = new \PHPParser_Serializer_XML;
+                    $xmlTree = $serializer->serialize($stmts);
                     //file_put_contents($item . '.stmts', var_export($stmts, true));
-                    $numberOfMethodCalls = $this->collectMethodCalls($stmts);
+                    $numberOfMethodCalls = $this->collectMethodCalls(
+                        $stmts,
+                        simplexml_load_string($xmlTree)
+                    );
                 } catch (\PHPParser_Error $e) {
                     // no valid php
                     continue;
@@ -106,17 +111,28 @@ class Extension
      * @param PHPParser_Node_Stmt $stmt 
      * @return int Number of called methods
      */
-    protected function collectMethodCalls($stmt, $debug=false)
+    protected function collectMethodCalls($stmt, $xmlTree)
     {
+        $methods = $xmlTree->xpath('//node:Expr_MethodCall');
+        foreach ($methods as $method) {
+            die(var_dump(__FILE__ . ' on line ' . __LINE__ . ':', $method));
+        }
+        die(var_dump(__FILE__ . ' on line ' . __LINE__ . ':', $methods));
         $numberOfMethodCalls = 0;
         if (is_array($stmt)) {
             foreach ($stmt as $subNode) {
-                $numberOfMethodCalls += $this->collectMethodCalls($subNode);
+                $numberOfMethodCalls += $this->collectMethodCalls($subNode, $xmlTree);
             }
         }
         if (is_object($stmt)) {
             foreach ($stmt->getSubNodeNames() as $name) {
-                $numberOfMethodCalls += $this->collectMethodCalls($stmt->$name);
+                $numberOfMethodCalls += $this->collectMethodCalls($stmt->$name, $xmlTree);
+            }
+        }
+        if ($stmt instanceof \PHPParser_Node_Expr_Assign) {
+            if (isset($stmt->var)) {
+                $variable = $stmt->var;
+                $type = $this->determineExpressionType($var, $xmlTree);
             }
         }
         if ($stmt instanceof \PHPParser_Node_Expr_MethodCall
@@ -131,5 +147,10 @@ class Extension
             ++$numberOfMethodCalls;
         }
         return $numberOfMethodCalls;
+    }
+
+    protected function determineExpressionType($var, $xmlTree)
+    {
+        $xmlTree->xpath('//');
     }
 }

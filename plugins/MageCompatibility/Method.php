@@ -100,6 +100,13 @@ class Method extends Tag
         return ($type == $expectedType);
     }
 
+    public function isExtensionMethod($name, $extensionPath)
+    {
+        $token = 'function ' . $name;
+        $command = 'grep -rEl "' . $token . '" ' . $extensionPath . '/app';
+        exec($command, $filesWithThatToken, $return);
+    }
+
     /**
      * examine return type of the method
      * 
