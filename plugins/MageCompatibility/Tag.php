@@ -28,18 +28,26 @@ class Tag
             INNER JOIN [signatures] s ON (ts.signature_id = s.id)
             WHERE t.name = %s
             GROUP BY s.id'
-        ;
+            ;
         try {
             $result = dibi::query($query, $this->getName());
             $versions = array();
             if (1 < count($result)) {
                 $result = $this->getBestMatching($result->fetchAll());
             }
-if ('helper' == $this->name) die(var_dump(__FILE__ . ' on line ' . __LINE__ . ':', $result));
             if (is_null($result)) {
                 return null;
             }
-            $signatureId = $result->fetchSingle();
+            if (is_array($result)) {
+                if (0 < count($result)) {
+                    $firstResult = current($result);
+                    $signatureId = is_object($result) ? current($result)->signature_id : $firstResult;
+                } else {
+                    $signatureId = false;
+                }
+            } else {
+                $signatureId = $result->fetchSingle();
+            }
             if (false == $signatureId) {
                 Logger::warning('Could not find any matching definition of ' . $this->name);
                 return array();
@@ -49,7 +57,7 @@ if ('helper' == $this->name) die(var_dump(__FILE__ . ' on line ' . __LINE__ . ':
                 FROM [magento_signature] ms
                 INNER JOIN [magento] m ON (ms.magento_id = m.id)
                 WHERE ms.signature_id = %s'
-            ;
+                ;
             return dibi::fetchPairs($query, $signatureId);
         } catch (\DibiDriverException $e) {
             die(var_dump(__FILE__ . ' on line ' . __LINE__ . ':', $this));
@@ -66,7 +74,6 @@ if ('helper' == $this->name) die(var_dump(__FILE__ . ' on line ' . __LINE__ . ':
 
     protected function filterByParamCount($candidates)
     {
-if ('helper' == $this->name) var_dump(__FILE__ . ' on line ' . __LINE__ . ':', $candidates);
         foreach ($candidates as $key => $candidate) {
             $givenParamsCount = count($this->params);
             $minParamsCount = $candidate->required_params_count;
@@ -77,33 +84,25 @@ if ('helper' == $this->name) var_dump(__FILE__ . ' on line ' . __LINE__ . ':', $
                 unset($candidates[$key]);
             }
         }
-if ('helper' == $this->name) var_dump(__FILE__ . ' on line ' . __LINE__ . ':', $candidates, $this->context);
         return $candidates;
     }
 
     protected function filterByContext($candidates)
     {
-        if (0 == count($this->context)) {
+        if (false === array_key_exists('class', $this->context)) {
             return $candidates;
         }
-        $query = 'SELECT s.path
-            FROM [classes] c
-            INNER JOIN [class_signature] cs ON (c.id = cs.class_id)
-            INNER JOIN [signatures] s ON (s.id = cs.signature_id)
-            WHERE c.name = %s';
-        try {
-            $result = dibi::query($query, $this->context);
-            $path = $result->fetchSingle();
-            if (false == $path) {
-                return null;
+        if (0 < count($candidates) && current($candidates)->class_id) {
+            $classIds = array();
+            foreach ($candidates as $key=>$candidate) {
+                $classIds[$key] = $candidate->class_id;
             }
-            die(var_dump(__FILE__ . ' on line ' . __LINE__ . ':', $path));
-            die(var_dump(__FILE__ . ' on line ' . __LINE__ . ':', $candidates, $this->name, $this->params, $this->context));
-            return $candidates;
-        } catch (\DibiDriverException $e) {
-            dibi::test($query, $this->context);
-            die(var_dump(__FILE__ . ' on line ' . __LINE__ . ':', $this->context, $this->name));
-            exit;
+            $result = dibi::fetchPairs(
+                'SELECT name, id FROM [classes] WHERE id IN (%s) AND name=%s',
+                $classIds,
+                $this->context['class']
+            );
+            return $result;
         }
     }
 

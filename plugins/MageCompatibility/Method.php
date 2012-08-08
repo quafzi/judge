@@ -40,6 +40,7 @@ class Method extends Tag
     protected function getFieldsToSelect()
     {
         $fields = parent::getFieldsToSelect();
+        $fields[] = 'class_id';
         $fields[] = 'visibility';
         $fields[] = 'required_params_count';
         $fields[] = 'optional_params_count';

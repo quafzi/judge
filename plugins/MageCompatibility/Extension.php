@@ -243,42 +243,11 @@ class Extension
             $method = new Method(
                 current($methodName),
                 $args,
-                array($object)
+                array('class' => $object)
             );
             ++$numberOfMethodCalls;
             $this->usedMethods->add($method);
         }
-        return $numberOfMethodCalls;
-        /*
-        die(var_dump(__FILE__ . ' on line ' . __LINE__ . ':', $xmlTree->xpath($methodCallXPath)));
-        $methods = $xmlTree->xpath('//*[local-name() = "Expr_MethodCall"]');
-        foreach ($methods as $method) {
-            die(var_dump(__FILE__ . ' on line ' . __LINE__ . ':', $method));
-        }
-        die(var_dump(__FILE__ . ' on line ' . __LINE__ . ':', $methods));
-        $numberOfMethodCalls = 0;
-        if (is_array($stmt)) {
-            foreach ($stmt as $subNode) {
-                $numberOfMethodCalls += $this->collectMethodCalls($subNode, $xmlTree);
-            }
-        }
-        if (is_object($stmt)) {
-            foreach ($stmt->getSubNodeNames() as $name) {
-                $numberOfMethodCalls += $this->collectMethodCalls($stmt->$name, $xmlTree);
-            }
-        }
-        if ($stmt instanceof \PHPParser_Node_Expr_Assign) {
-            if (isset($stmt->var)) {
-                $variable = $stmt->var;
-                $type = $this->determineExpressionType($var, $xmlTree);
-            }
-        }
-        if ($stmt instanceof \PHPParser_Node_Expr_MethodCall
-            || $stmt instanceof \PHPParser_Node_Expr_StaticCall
-        ) {
-            ++$numberOfMethodCalls;
-        }
-         */
         return $numberOfMethodCalls;
     }
 
