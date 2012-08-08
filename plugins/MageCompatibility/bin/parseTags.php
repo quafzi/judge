@@ -110,6 +110,7 @@ class TagParser
         );
         $signatureData = array(
             'type'       => 'class',
+            'path'       => $path,
             'definition' => $codeLine
         );
         $classes = dibi::query(
