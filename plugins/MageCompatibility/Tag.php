@@ -19,6 +19,11 @@ class Tag
         );
     }
 
+    /**
+     * determine which Magento versions seem to be compatible to this call
+     * 
+     * @return array Array of Magento versions (e.g. [ 'CE 1.6.2.0', 'CE 1.7.0.2' ])
+     */
     public function getMagentoVersions()
     {
         $this->connectTagDatabase();
@@ -30,6 +35,7 @@ class Tag
             GROUP BY s.id'
             ;
         try {
+            /* find all signatures matching that call */
             $result = dibi::query($query, $this->getName());
             $versions = array();
             if (1 < count($result)) {
@@ -38,6 +44,8 @@ class Tag
             if (is_null($result)) {
                 return null;
             }
+
+            /* get best matching signature id */
             if (is_array($result)) {
                 if (0 < count($result)) {
                     $firstResult = current($result);
@@ -53,6 +61,7 @@ class Tag
                 return array();
             }
 
+            /* fetch Magento versions */
             $query = 'SELECT CONCAT(edition, " ", version) AS magento
                 FROM [magento_signature] ms
                 INNER JOIN [magento] m ON (ms.magento_id = m.id)
@@ -65,6 +74,12 @@ class Tag
         }
     }
 
+    /**
+     * determine best matching signature
+     * 
+     * @param array $candidates Array of DibiRows
+     * @return array
+     */
     protected function getBestMatching($candidates)
     {
         $candidates = $this->filterByParamCount($candidates);
@@ -72,6 +87,12 @@ class Tag
         return $candidates;
     }
 
+    /**
+     * determine signatures matching the given param count
+     * 
+     * @param array $candidates Array of DibiRows
+     * @return array
+     */
     protected function filterByParamCount($candidates)
     {
         foreach ($candidates as $key => $candidate) {
@@ -87,6 +108,13 @@ class Tag
         return $candidates;
     }
 
+    /**
+     * determine signatures with the same context
+     * currently we only check if the class we detected matches the signature
+     * 
+     * @param array $candidates Array of DibiRows
+     * @return array
+     */
     protected function filterByContext($candidates)
     {
         if (false === array_key_exists('class', $this->context)) {
@@ -111,6 +139,11 @@ class Tag
         $this->config = $config;
     }
 
+    /**
+     * connect to tag database
+     * 
+     * @return void
+     */
     protected function connectTagDatabase()
     {
         $basedir = realpath(dirname(__FILE__) . '/../../');
