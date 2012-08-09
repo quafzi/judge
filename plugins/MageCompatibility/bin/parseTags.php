@@ -47,7 +47,7 @@ class TagParser
             'd' => 'addConstant',  // constant definitions
             'f' => 'addMethod',    // functions
             /* tag types to be ignored
-            'v' => 'addVariable',  // variables               
+            'v' => 'addVariable',  // variables
             'j' => 'addJavascript' // javascript functions
              */
         );
@@ -74,6 +74,7 @@ class TagParser
                     echo "found invalid type \"$type\" on line $tagFileLineNumber";
                     exit(1);
                 }
+
                 if ($currentType == $type) {
                     $this->$call($tag, $path, $codeLine);
                     ++$done;
@@ -97,10 +98,10 @@ class TagParser
 
     /**
      * add class to database
-     * 
-     * @param mixed $name 
-     * @param mixed $path 
-     * @param mixed $codeLine 
+     *
+     * @param mixed $name
+     * @param mixed $path
+     * @param mixed $codeLine
      * @return void
      */
     protected function addClass($name, $path, $codeLine)
@@ -127,7 +128,6 @@ class TagParser
             dibi::query('INSERT INTO [signatures] %v', $signatureData);
             $signatureId = dibi::getInsertId();
             dibi::query('INSERT INTO [class_signature] %v', array('class_id' => $classId, 'signature_id' => $signatureId));
-            $signatureId = dibi::getInsertId();
             $this->assignSignatureToMagento($signatureId);
         }
     }
@@ -139,7 +139,7 @@ class TagParser
 
     /**
      * addConstant
-     * 
+     *
      * @param mixed $name
      * @param mixed $path
      * @param mixed $codeLine
@@ -189,7 +189,10 @@ class TagParser
             'optional' => 0
         );
         preg_match('/(.*)\((.*)\)/', $call, $matches);
-        list ($call, $method, $params) = $matches;
+        $params = '';
+        if (0 < count($matches)) {
+            list ($call, $method, $params) = $matches;
+        }
 
         if (strlen($params)) {
             $params = explode(', ', $params);
@@ -252,8 +255,8 @@ class TagParser
 
     /**
      * create class if needed, return its id
-     * 
-     * @param string $name 
+     *
+     * @param string $name
      * @return int
      */
     protected function fetchClassId($name)
@@ -269,8 +272,8 @@ class TagParser
 
     /**
      * create method if needed, return its id
-     * 
-     * @param string $name 
+     *
+     * @param string $name
      * @return int
      */
     protected function fetchMethodId($name, $classId)
@@ -289,10 +292,10 @@ class TagParser
 
     /**
      * create signature if needed, return its id
-     * 
-     * @param char   $type 
-     * @param string $definition 
-     * @param string $path 
+     *
+     * @param char   $type
+     * @param string $definition
+     * @param string $path
      * @return int
      */
     protected function fetchSignatureId($type, $definition, $path)
@@ -319,6 +322,11 @@ class TagParser
 
     public function getClassNameForPath($path)
     {
+        $fileExtensions = explode('.', $path);
+
+        if (!in_array(end($fileExtensions), array('.php'))) {
+            return '';
+        }
         /**
          * lib/Zend/Foo/Bar.php
          * app/code/core/Foo/Bar/Some/Path.php
@@ -328,7 +336,8 @@ class TagParser
             'app/code/core',
             'app/code/community',
             'app/code/local',
-            '.php'
+            'app',
+            '.php',
         );
         foreach ($irrelevantPathParts as $part)
         {
