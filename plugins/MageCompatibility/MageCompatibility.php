@@ -39,17 +39,15 @@ class MageCompatibility implements JudgePlugin
 
         $magentoVersions = array();
         foreach ($classes as $class) {
-            echo $class->getName() . ' ';
             $class->setConfig($this->settings);
             $supportedVersions = $class->getMagentoVersions();
             if (is_array($supportedVersions)) {
-                echo implode(', ', $supportedVersions);
                 $magentoVersions += $class->getMagentoVersions();
             }
-            echo PHP_EOL;
         }
         foreach ($methods as $method) {
-            echo $method->getName() . ' ';
+			$context = $method->getContext();
+            echo $context['class'] . '->' . $method->getName() . ' ';
             $method->setConfig($this->settings);
             $supportedVersions = $method->getMagentoVersions();
             if (is_array($supportedVersions)) {

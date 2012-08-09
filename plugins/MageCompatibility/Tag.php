@@ -37,39 +37,52 @@ class Tag
         try {
             /* find all signatures matching that call */
             $result = dibi::query($query, $this->getName());
-            $versions = array();
-            if (1 < count($result)) {
-                $result = $this->getBestMatching($result->fetchAll());
-            }
-            if (is_null($result)) {
-                return null;
-            }
+        } catch (\DibiDriverException $e) {
+            dibi::test($query, $this->getName());
+            //die(var_dump(__FILE__ . ' on line ' . __LINE__ . ':', $this, $e->getMessage(), $query));
+            exit;
+        }
+        $versions = array();
+        if (1 < count($result)) {
+            $result = $this->getBestMatching($result->fetchAll());
+        }
+        if (is_null($result)) {
+            return null;
+        }
 
-            /* get best matching signature id */
-            if (is_array($result)) {
-                if (0 < count($result)) {
-                    $firstResult = current($result);
-                    $signatureId = is_object($result) ? current($result)->signature_id : $firstResult;
-                } else {
-                    $signatureId = false;
-                }
+        /* get best matching signature id */
+        if (is_array($result)) {
+            if (0 < count($result)) {
+                $firstResult = current($result);
+                $signatureId = is_object($result) ? current($result)->signature_id : $firstResult;
             } else {
+                $signatureId = false;
+            }
+        } else {
+            try {
                 $signatureId = $result->fetchSingle();
+            } catch (\DibiDriverException $e) {
+                dibi::test($query, $signatureId);
+                //die(var_dump(__FILE__ . ' on line ' . __LINE__ . ':', $this, $e->getMessage(), $query));
+                exit;
             }
-            if (false == $signatureId) {
-                Logger::warning('Could not find any matching definition of ' . $this->name);
-                return array();
-            }
+        }
+        if (false == $signatureId) {
+            Logger::warning('Could not find any matching definition of ' . $this->name);
+            return array();
+        }
 
-            /* fetch Magento versions */
-            $query = 'SELECT CONCAT(edition, " ", version) AS magento
-                FROM [magento_signature] ms
-                INNER JOIN [magento] m ON (ms.magento_id = m.id)
-                WHERE ms.signature_id = %s'
-                ;
+        /* fetch Magento versions */
+        $query = 'SELECT CONCAT(edition, " ", version) AS magento
+            FROM [magento_signature] ms
+            INNER JOIN [magento] m ON (ms.magento_id = m.id)
+            WHERE ms.signature_id = %s'
+            ;
+        try {
             return dibi::fetchPairs($query, $signatureId);
         } catch (\DibiDriverException $e) {
-            die(var_dump(__FILE__ . ' on line ' . __LINE__ . ':', $this));
+            dibi::test($query, $signatureId);
+            //die(var_dump(__FILE__ . ' on line ' . __LINE__ . ':', $this, $e->getMessage(), $query));
             exit;
         }
     }
@@ -117,7 +130,7 @@ class Tag
      */
     protected function filterByContext($candidates)
     {
-        if (false === array_key_exists('class', $this->context)) {
+        if (false === array_key_exists('class', $this->context) && 0 < strlen($this->context['class'])) {
             return $candidates;
         }
         if (0 < count($candidates) && current($candidates)->class_id) {
@@ -125,11 +138,21 @@ class Tag
             foreach ($candidates as $key=>$candidate) {
                 $classIds[$key] = $candidate->class_id;
             }
-            $result = dibi::fetchPairs(
-                'SELECT name, id FROM [classes] WHERE id IN (%s) AND name=%s',
-                $classIds,
-                $this->context['class']
-            );
+            try {
+                $query = 'SELECT name, id FROM [classes] WHERE id IN (%s) AND name=%s';
+                $result = dibi::fetchPairs(
+                    $query,
+                    $classIds,
+                    $this->context['class']
+                );
+            } catch (\DibiDriverException $e) {
+                dibi::test(
+                    $query,
+                    $classIds,
+                    $this->context['class']
+                );
+                throw $e;
+            }
             return $result;
         }
     }

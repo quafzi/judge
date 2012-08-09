@@ -117,10 +117,10 @@ class Extension
     {
         $type = Method::TYPE_MIXED;
         if ($node->xpath('./node:Expr_StaticCall')) {
-            $staticCall = current($node->xpath(
+            $class = current($node->xpath(
                 './node:Expr_StaticCall/subNode:class/node:Name/subNode:parts/scalar:array/scalar:string/text()'
             ));
-            if ($staticCall && current($staticCall) == 'Mage') {
+            if ($class && current($class) == 'Mage') {
                 $node = current($node->xpath('./node:Expr_StaticCall'));
                 $method = current($node->xpath('./subNode:name/scalar:string/text()'));
                 $firstArgument = current($node->xpath('./subNode:args/scalar:array/node:Arg/subNode:value'));
@@ -135,11 +135,14 @@ class Extension
                 } elseif ('helper' == $method) {
                     $type = $this->getClassName('helper', $firstArgument);
                 }
-            } elseif ($staticCall && current($staticCall) == 'parent') {
+            } elseif ($class && current($class) == 'parent') {
                 /* @TODO: get return type of parent method */
             }
         } elseif ($node->xpath('./node:Name')) {
             $type = current(current($node->xpath('./node:Name/subNode:parts/scalar:array/scalar:string/text()')));
+			if ('parent' == $type) {
+				return $this->getParentClass($node);
+			}
         } elseif ($node->xpath('./node:Expr_Variable')) {
             $type = $this->getTypeOfVariable($node);
         } elseif ($node->xpath('./node:Scalar_String')) {
@@ -155,6 +158,15 @@ class Extension
         
         return $type;
     }
+
+	protected function getParentClass($node)
+	{
+		$extends = $node->xpath('./ancestor::node:Stmt_Class/subNode:extends/node:Name/subNode:parts/scalar:array/scalar:string/text()');
+		if ($extends && 0 < count($extends)) {
+			return current(current($extends));
+		}
+		throw new \Exception('Extension uses parent without extending another class');
+	}
 
     protected function getTypeOfVariable($node)
     {
@@ -238,7 +250,8 @@ class Extension
             }
 
             //echo 'Called method ' . $methodName . ' ';
-            $object = $this->getResultType(current($call->xpath('./subNode:var | ./subNode:class')));
+			$variable = current($call->xpath('./subNode:var | ./subNode:class'));
+            $object = $this->getResultType($variable);
             //echo 'on ' . $object . PHP_EOL;
             $method = new Method(
                 current($methodName),
