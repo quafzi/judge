@@ -46,14 +46,20 @@ class MageCompatibility implements JudgePlugin
             }
         }
         foreach ($methods as $method) {
-			$context = $method->getContext();
-            echo $context['class'] . '->' . $method->getName() . ' ';
+            $context = $method->getContext();
             $method->setConfig($this->settings);
             $supportedVersions = $method->getMagentoVersions();
-            if (is_array($supportedVersions)) {
-                echo implode(', ', $supportedVersions);
-                $magentoVersions += $method->getMagentoVersions();
+            echo $context['class'] . '->' . $method->getName() . ' ';
+            if (false == is_array($supportedVersions)) {
+                die(var_dump(__FILE__ . ' on line ' . __LINE__ . ':', $method->getName()));
             }
+            if (count($supportedVersions)) {
+                $magentoVersions += $supportedVersions;
+            }
+            if ($extension->hasMethod($method->getName())) {
+                echo '[maybe part of the extension]';
+            }
+            echo implode(', ', $supportedVersions);
             echo PHP_EOL;
         }
         Logger::addComment(

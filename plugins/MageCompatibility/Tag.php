@@ -43,31 +43,22 @@ class Tag
             exit;
         }
         $versions = array();
-        if (1 < count($result)) {
-            $result = $this->getBestMatching($result->fetchAll());
-        }
         if (is_null($result)) {
-            return null;
+            return $versions;
         }
 
         /* get best matching signature id */
-        if (is_array($result)) {
-            if (0 < count($result)) {
-                $firstResult = current($result);
-                $signatureId = is_object($result) ? current($result)->signature_id : $firstResult;
-            } else {
-                $signatureId = false;
-            }
+        if (1 < count($result)) {
+            $signatureIds = $this->getBestMatching($result->fetchAll());
         } else {
             try {
-                $signatureId = $result->fetchSingle();
+                $signatureIds = array_keys($result->fetchPairs());
             } catch (\DibiDriverException $e) {
                 dibi::test($query, $signatureId);
-                //die(var_dump(__FILE__ . ' on line ' . __LINE__ . ':', $this, $e->getMessage(), $query));
                 exit;
             }
         }
-        if (false == $signatureId) {
+        if (false == is_array($signatureIds) || 0 == count($signatureIds)) {
             Logger::warning('Could not find any matching definition of ' . $this->name);
             return array();
         }
@@ -76,10 +67,11 @@ class Tag
         $query = 'SELECT CONCAT(edition, " ", version) AS magento
             FROM [magento_signature] ms
             INNER JOIN [magento] m ON (ms.magento_id = m.id)
-            WHERE ms.signature_id = %s'
+            WHERE ms.signature_id IN (%s)
+            GROUP BY magento'
             ;
         try {
-            return dibi::fetchPairs($query, $signatureId);
+            return dibi::fetchPairs($query, $signatureIds);
         } catch (\DibiDriverException $e) {
             dibi::test($query, $signatureId);
             //die(var_dump(__FILE__ . ' on line ' . __LINE__ . ':', $this, $e->getMessage(), $query));
@@ -97,7 +89,11 @@ class Tag
     {
         $candidates = $this->filterByParamCount($candidates);
         $candidates = $this->filterByContext($candidates);
-        return $candidates;
+        $signatureIds = array();
+        foreach ($candidates as $candidate) {
+            $signatureIds[] = $candidate->signature_id;
+        }
+        return $signatureIds;
     }
 
     /**
@@ -130,16 +126,18 @@ class Tag
      */
     protected function filterByContext($candidates)
     {
-        if (false === array_key_exists('class', $this->context) && 0 < strlen($this->context['class'])) {
-            return $candidates;
-        }
-        if (0 < count($candidates) && current($candidates)->class_id) {
+        if (false === array_key_exists('class', $this->context)
+            && 0 < strlen($this->context['class']
+            && Method::TYPE_MIXED !== $this->context['class']
+            && 0 < count($candidates)
+            && current($candidates)->class_id)
+        ) {
             $classIds = array();
+            $query = 'SELECT name, id FROM [classes] WHERE id IN (%s) AND name=%s';
             foreach ($candidates as $key=>$candidate) {
                 $classIds[$key] = $candidate->class_id;
             }
             try {
-                $query = 'SELECT name, id FROM [classes] WHERE id IN (%s) AND name=%s';
                 $result = dibi::fetchPairs(
                     $query,
                     $classIds,
@@ -153,8 +151,15 @@ class Tag
                 );
                 throw $e;
             }
-            return $result;
+            $contextMatchingCandidates = $candidates;
+            foreach ($candidates as $key=>$candidate) {
+                if (false == in_array($candidate->class_id, $classIds)) {
+                    unset($contextMatchingCandidates[$key]);
+                }
+            }
+            return count($contextMatchingCandidates) ? $contextMatchingCandidates : $candidates;
         }
+        return $candidates;
     }
 
     public function setConfig($config)
