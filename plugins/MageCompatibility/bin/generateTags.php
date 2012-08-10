@@ -4,7 +4,7 @@
  */
 
 if (2 != count($argv)) {
-    die('Please submit exactly one param: The path to the Magento app directory' . PHP_EOL);
+    die('Please submit exactly one param: The path to the Magento root directory' . PHP_EOL);
 }
 $pathToMagentoBaseDir = $argv[1];
 if (substr($pathToMagentoBaseDir, -1) != '/') {
