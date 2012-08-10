@@ -87,6 +87,14 @@ class TagParser
                     $timeSpent = time() - $startedAt;
                     $secondsLeft = round($lines * $timeSpent / $done) - $timeSpent;
                     $timeLeft = ", approx. {$secondsLeft}s left";
+                    if (90 < $secondsLeft) {
+                        $minutesLeft = round($secondsLeft / 60);
+                        $timeLeft = ", approx. {$minutesLeft}min left";
+                        if (90 < $minutesLeft) {
+                            $hoursLeft = round($minutesLeft / 60);
+                            $timeLeft = ", approx. {$hoursLeft}h left";
+                        }
+                    }
                 }
                 $memusage = ', ' . round(memory_get_usage()/1000)/1000 . 'MB';
                 $percent = number_format(100 * $done / ($lines - $ignore), 3);
