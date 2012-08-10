@@ -85,8 +85,8 @@ class Tagger
                 continue;
             }
 
-            $strippedCodeLine = preg_replace('/".*"/', '', $codeLine);
-            $strippedCodeLine = preg_replace('/\'.*\'/', '', $strippedCodeLine);
+            $strippedCodeLine = preg_replace('/".*"/U', '""', substr($codeLine, 0, strlen($codeLine)-1));
+            $strippedCodeLine = preg_replace('/\'.*\'/U', '\'\'', $strippedCodeLine);
             if (substr_count($strippedCodeLine, '(') !== substr_count($strippedCodeLine, ')')) {
                 $codeLine = $this->getCompleteFunctionDefinition($path, $tag, $sourceLineNumber);
             }
@@ -111,8 +111,10 @@ class Tagger
             $line = fgets($sourceFile);
             if ($sourceLineNumber == $currentLineNumber) {
                 $functionDefinition = '/^' . str_replace("\n", '', $line);
+                $functionDefinition = '/^' . str_replace("\r", '', $functionDefinition);
+                $functionDefinition = '/^' . str_replace("\t", '', $functionDefinition);
             }
-            if ($sourceLineNumber < $currentLineNumber) {
+            if ($sourceLineNumber <= $currentLineNumber) {
                 $bodyStartPos = strpos($line, '{');
                 if (false !== $bodyStartPos) {
                     $line = substr($line, 0, $bodyStartPos);
