@@ -85,7 +85,7 @@ class TagParser
                 $timeLeft = '';
                 if (20 < $done) {
                     $timeSpent = time() - $startedAt;
-                    $secondsLeft = round($lines * $timeSpent / $done);
+                    $secondsLeft = round($lines * $timeSpent / $done) - $timeSpent;
                     $timeLeft = ", approx. {$secondsLeft}s left";
                 }
                 $memusage = ', ' . round(memory_get_usage()/1000)/1000 . 'MB';
