@@ -114,30 +114,15 @@ class TagParser
      */
     protected function addClass($name, $path, $codeLine)
     {
-        $data = array(
-            'name' => $name,
-        );
-        $signatureData = array(
-            'type'       => 'class',
-            'path'       => $path,
-            'definition' => $codeLine
-        );
-        $classes = dibi::query(
-            'SELECT *
-             FROM [classes] c
-             INNER JOIN [class_signature] cs ON c.id = cs.class_id
-             INNER JOIN [signatures] s ON s.id = cs.signature_id
-             WHERE name = %s',
-            $name
-        )->fetchAll();
+        $data = array('name' => $name);
+        $classes = dibi::query('SELECT * FROM [classes] c WHERE name = %s', $name)->fetchAll();
+        $signatureId = $this->fetchSignatureId('c', trim($codeLine), $path);
         if (0 == count($classes)) {
             dibi::query('INSERT INTO [classes] %v', $data);
             $classId = dibi::getInsertId();
-            dibi::query('INSERT INTO [signatures] %v', $signatureData);
-            $signatureId = dibi::getInsertId();
             dibi::query('INSERT INTO [class_signature] %v', array('class_id' => $classId, 'signature_id' => $signatureId));
-            $this->assignSignatureToMagento($signatureId);
         }
+        $this->assignSignatureToMagento($signatureId);
     }
 
     protected function addInterface($name, $path, $codeLine)
@@ -152,10 +137,20 @@ class TagParser
      * @param mixed $path
      * @param mixed $codeLine
      * @return void
-     * @TODO
      */
     protected function addConstant($name, $path, $codeLine)
     {
+        $data = array('name' => $name);
+        $className = $this->getClassNameForPath($path);
+        $classId   = $this->fetchClassId($className);
+        $constants = dibi::query('SELECT * FROM [constants] c WHERE name = %s', $name)->fetchAll();
+        $signatureId = $this->fetchSignatureId('d', trim($codeLine), $path);
+        if (0 == count($constants)) {
+            dibi::query('INSERT INTO [constants] %v', $data);
+            $constantId = dibi::getInsertId();
+            dibi::query('INSERT INTO [constant_signature] %v', array('constant_id' => $constantId, 'signature_id' => $signatureId));
+        }
+        $this->assignSignatureToMagento($signatureId);
     }
 
     /**
@@ -322,10 +317,11 @@ class TagParser
             );
             dibi::query('INSERT INTO [signatures] %v', $data);
             $signatureId = dibi::getInsertId();
-            $this->assignSignatureToMagento($signatureId);
-            return $signatureId;
+        } else {
+            $signatureId = $signature->id;
         }
-        return $signature->id;
+        $this->assignSignatureToMagento($signatureId);
+        return $signatureId;
     }
 
     public function getClassNameForPath($path)
