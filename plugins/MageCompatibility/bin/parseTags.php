@@ -86,6 +86,7 @@ class TagParser
                 if (20 < $done) {
                     $timeSpent = time() - $startedAt;
                     $secondsLeft = round($lines * $timeSpent / $done) - $timeSpent;
+                    $estimatedEnd = date('H:i', time() + $secondsLeft);
                     $timeLeft = ", approx. {$secondsLeft}s left";
                     if (90 < $secondsLeft) {
                         $minutesLeft = round($secondsLeft / 60);
@@ -95,6 +96,7 @@ class TagParser
                             $timeLeft = ", approx. {$hoursLeft}h left";
                         }
                     }
+                    $timeLeft .= ' - should finish at ' . $estimatedEnd . '';
                 }
                 $memusage = ', ' . round(memory_get_usage()/1000)/1000 . 'MB';
                 $percent = number_format(100 * $done / ($lines - $ignore), 3);
