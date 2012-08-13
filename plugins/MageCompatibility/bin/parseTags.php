@@ -51,6 +51,7 @@ class TagParser
             'j' => 'addJavascript' // javascript functions
              */
         );
+
         $done = 0;
         exec('wc -l ' . $this->tagFileName, $wcOut);
         $lines = (int) current($wcOut);

@@ -140,9 +140,12 @@ class Method extends Tag
         return $this->params;
     }
 
-    public function getContext()
+    public function getContext($key=null)
     {
-        return $this->context;
+        if (is_null($key)) {
+            return $this->context;
+        }
+        return $this->context[$key];
     }
 
     /**

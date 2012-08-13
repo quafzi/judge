@@ -26,7 +26,6 @@ class Tag
      */
     public function getMagentoVersions()
     {
-        $this->connectTagDatabase();
         $query = 'SELECT ' . implode(', ', $this->getFieldsToSelect()) . '
             FROM [' . $this->table . '] t
             INNER JOIN [' . $this->tagType . '_signature] ts ON (t.id = ts.' . $this->tagType . '_id)
@@ -104,6 +103,16 @@ class Tag
      */
     protected function filterByParamCount($candidates)
     {
+        $infiniteParamsMethods = array(
+            'Mage_Core_Helper_Abstract' => array(
+                '__'
+            )
+        );
+        foreach ($infiniteParamsMethods as $class=>$methods) {
+            if (in_array($this->getName(), $methods)) {
+                return $candidates;
+            }
+        }
         foreach ($candidates as $key => $candidate) {
             $givenParamsCount = count($this->params);
             $minParamsCount = $candidate->required_params_count;
@@ -165,25 +174,5 @@ class Tag
     public function setConfig($config)
     {
         $this->config = $config;
-    }
-
-    /**
-     * connect to tag database
-     * 
-     * @return void
-     */
-    protected function connectTagDatabase()
-    {
-        $basedir = realpath(dirname(__FILE__) . '/../../');
-        require_once $basedir . '/vendor/dg/dibi/dibi/dibi.php';
-        if (false == dibi::isConnected()) {
-            dibi::connect(array(
-                //'driver'   => 'sqlite3',
-                //'database' => $basedir . '/plugins/MageCompatibility/var/tags.sqlite'
-                'driver'   => 'mysql',
-                'username' => 'root',
-                'database' => 'judge'
-            ));
-        }
     }
 }
