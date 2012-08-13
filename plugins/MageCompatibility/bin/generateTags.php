@@ -35,8 +35,14 @@ class Tagger
     {
         include $pathToMagentoBaseDir . 'app/Mage.php';
 
-        $this->edition = (method_exists('Mage', 'getEdition')) ? Mage::getEdition() : 'Community';
         $this->version = Mage::getVersion();
+        if (method_exists('Mage', 'getEdition')) {
+            $this->edition = Mage::getEdition();
+        } else {
+            preg_match('/^1\.(\d+)\./', $this->version, $matches);
+            $majorRelease = $matches[1];
+            $this->edition = ($majorRelease < 7) ? 'Community' : 'Enterprise';
+        }
         echo 'Analyzing Magento ' . $this->version . ' (' . $this->edition . ' Edition)...' . PHP_EOL;
     }
 
