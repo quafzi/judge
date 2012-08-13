@@ -193,14 +193,14 @@ class TagParser
             'required' => 0,
             'optional' => 0
         );
-        preg_match('/(.*)\((.*)\)/', $call, $matches);
+        preg_match('/([^\(]*)\((.*)\)/', $call, $matches);
         $params = '';
         if (0 < count($matches)) {
             list ($call, $method, $params) = $matches;
         }
 
         if (strlen($params)) {
-            $params = explode(', ', $params);
+            $params = explode(',', $params);
             $countOfRequiredParams = 0;
             $countOfOptionalParams = 0;
             foreach ($params as $param) {
