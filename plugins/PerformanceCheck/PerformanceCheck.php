@@ -40,7 +40,7 @@ class PerformanceCheck implements JudgePlugin
             if (0 < count($filesWithThatToken)) {
                 $score = $this->settings->bad;
                 Logger::addComment($extensionPath, $this->name, sprintf(
-                    'Found an indicator of using direct request params: "%s" at %s',
+                    '<comment>Found an indicator of a performance leak</comment>: "%s" at %s',
                     $performanceKiller,
                     implode(';' . PHP_EOL, $filesWithThatToken)
                 ));

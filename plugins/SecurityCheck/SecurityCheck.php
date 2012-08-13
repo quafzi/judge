@@ -64,7 +64,7 @@ class SecurityCheck implements JudgePlugin
             exec($command, $filesWithThatToken, $return);
             if (0 < count($filesWithThatToken)) {
                 Logger::addComment($extensionPath, $this->name, sprintf(
-                    'Found an indicator of using direct request params: "%s" at %s',
+                    '<comment>Found an indicator of using direct request params:</comment>"%s" at %s',
                     $requestPattern,
                     implode(';' . PHP_EOL, $filesWithThatToken)
                 ));
@@ -90,7 +90,7 @@ class SecurityCheck implements JudgePlugin
             exec($command, $filesWithThatToken, $return);
             if (0 < count($filesWithThatToken)) {
                 Logger::addComment($extensionPath, $this->name, sprintf(
-                    'Found an indicator of not escaping output: "%s" at %s',
+                    '<comment>Found an indicator of not escaping output:</comment>"%s" at %s',
                     $unescapedOutputPattern,
                     implode(';' . PHP_EOL, $filesWithThatToken)
                 ));
@@ -115,7 +115,7 @@ class SecurityCheck implements JudgePlugin
             exec($command, $filesWithThatToken, $return);
             if (0 < count($filesWithThatToken)) {
                 Logger::addComment($extensionPath, $this->name, sprintf(
-                    'Found an indicator of using direct sql queries: "%s" at %s',
+                    '<comment>Found an indicator of using direct sql queries:</comment>"%s" at %s',
                     $sqlQueryPattern,
                     implode(';' . PHP_EOL, $filesWithThatToken)
                 ));
