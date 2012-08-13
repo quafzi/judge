@@ -69,6 +69,11 @@ class TagParser
                 list($tag, $path, $codeLine, $type, $sourceLineNumber) = explode("\t", $line);
                 $codeLine = str_replace('/^', '', $codeLine);
                 $codeLine = str_replace('$/;"', '', $codeLine);
+                if (0 === strpos('downloader/', $path)) {
+                    // skip downloader
+                    ++$ignore;
+                    continue;
+                }
 
                 if (1 != strlen($type)) {
                     echo "found invalid type \"$type\" on line $tagFileLineNumber";
@@ -266,6 +271,9 @@ class TagParser
      */
     protected function fetchClassId($name)
     {
+        if (0 == strlen ($name)) {
+            return null;
+        }
         $data = array('name' => $name);
         $class = dibi::query('SELECT * FROM [classes] WHERE name = %s', $name)->fetch();
         if (false == $class) {
@@ -330,19 +338,24 @@ class TagParser
     {
         $fileExtensions = explode('.', $path);
 
-        if (!in_array(end($fileExtensions), array('.php'))) {
+        if (!in_array(end($fileExtensions), array('php'))) {
             return '';
+        }
+        /**
+         * since Mage.php is a special case we handle it separately
+         */
+        if ('app/Mage.php' == $path) {
+            return 'Mage';
         }
         /**
          * lib/Zend/Foo/Bar.php
          * app/code/core/Foo/Bar/Some/Path.php
          */
         $irrelevantPathParts = array(
-            'lib',
-            'app/code/core',
-            'app/code/community',
-            'app/code/local',
-            'app',
+            'lib/',
+            'app/code/core/',
+            'app/code/community/',
+            'app/code/local/',
             '.php',
         );
         foreach ($irrelevantPathParts as $part)
