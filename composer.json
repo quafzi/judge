@@ -13,10 +13,10 @@
         "phpmd/phpmd":               "dev-master",
         "zerkalica/PHP_Codesniffer": "dev-master",
         "nikic/php-parser":          "dev-master",
-        "dg/dibi":                   "dev-master"
+        "dg/dibi":                   "dev-master",
         "netresearch/jumpstorm":     "dev-master",
-        "symfony/console":           "*",
-        "symfony/class-loader":      "*"
+        "symfony/console":           "2.0.x-dev",
+        "symfony/class-loader":      "2.0.x-dev"
     },
     "authors": [
         {
