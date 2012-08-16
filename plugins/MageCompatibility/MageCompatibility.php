@@ -41,7 +41,6 @@ class MageCompatibility implements JudgePlugin
             )
         );
 
-        $magentoVersions = array();
         $incompatibleVersions = array();
         foreach ($availableVersions as $version) {
             $incompatibleVersions[$version] = array(
@@ -84,11 +83,13 @@ class MageCompatibility implements JudgePlugin
             //echo PHP_EOL;
         }
 
+        $compatibleVersions = array();
+
         foreach ($incompatibleVersions as $version=>$incompatibilities) {
             $message = '';
-            $incompatibleClasses   = $incompatibilities['classes'];
-            $incompatibleMethods   = $incompatibilities['methods'];
-            $incompatibleConstants = $incompatibilities['constants'];
+            $incompatibleClasses   = array_unique($incompatibilities['classes']);
+            $incompatibleMethods   = array_unique($incompatibilities['methods']);
+            $incompatibleConstants = array_unique($incompatibilities['constants']);
             if (0 < count($incompatibleClasses)) {
                 $message .= sprintf(
                     "<comment>The following classes are not compatible to Magento %s:</comment>\n  * %s\n",
@@ -116,13 +117,16 @@ class MageCompatibility implements JudgePlugin
                     $this->name,
                     sprintf("<error>Extension is not compatible to Magento %s</error>\n%s", $version, $message)
                 );
+            } else {
+                $compatibleVersions[] = $version;
             }
         }
 
         Logger::addComment(
             $extensionPath,
             $this->name,
-            'Extension seems to support following Magento versions: ' . implode(', ', $magentoVersions)
+            'Checked Magento versions: ' . implode(', ', $availableVersions) . "\n"
+            . '* Extension seems to support following Magento versions: ' . implode(', ', $compatibleVersions)
         );
 
         Logger::setScore($extensionPath, current(explode('\\', __CLASS__)), $this->settings->bad);
