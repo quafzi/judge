@@ -95,84 +95,18 @@ class Tag
         return $signatureIds;
     }
 
-    /**
-     * determine signatures matching the given param count
-     * 
-     * @param array $candidates Array of DibiRows
-     * @return array
-     */
-    protected function filterByParamCount($candidates)
-    {
-        $infiniteParamsMethods = array(
-            'Mage_Core_Helper_Abstract' => array(
-                '__'
-            )
-        );
-        foreach ($infiniteParamsMethods as $class=>$methods) {
-            if (in_array($this->getName(), $methods)) {
-                return $candidates;
-            }
-        }
-        foreach ($candidates as $key => $candidate) {
-            $givenParamsCount = count($this->params);
-            $minParamsCount = $candidate->required_params_count;
-            $maxParamsCount = $candidate->required_params_count + $candidate->optional_params_count;
-            if ($givenParamsCount < $minParamsCount
-                || $maxParamsCount < $givenParamsCount
-            ) {
-                unset($candidates[$key]);
-            }
-        }
-        return $candidates;
-    }
-
-    /**
-     * determine signatures with the same context
-     * currently we only check if the class we detected matches the signature
-     * 
-     * @param array $candidates Array of DibiRows
-     * @return array
-     */
-    protected function filterByContext($candidates)
-    {
-        if (false === array_key_exists('class', $this->context)
-            && 0 < strlen($this->context['class']
-            && Method::TYPE_MIXED !== $this->context['class']
-            && 0 < count($candidates)
-            && current($candidates)->class_id)
-        ) {
-            $classIds = array();
-            $query = 'SELECT name, id FROM [classes] WHERE id IN (%s) AND name=%s';
-            foreach ($candidates as $key=>$candidate) {
-                $classIds[$key] = $candidate->class_id;
-            }
-            try {
-                $result = dibi::fetchPairs(
-                    $query,
-                    $classIds,
-                    $this->context['class']
-                );
-            } catch (\DibiDriverException $e) {
-                dibi::test(
-                    $query,
-                    $classIds,
-                    $this->context['class']
-                );
-                throw $e;
-            }
-            $contextMatchingCandidates = $candidates;
-            foreach ($candidates as $key=>$candidate) {
-                if (false == in_array($candidate->class_id, $classIds)) {
-                    unset($contextMatchingCandidates[$key]);
-                }
-            }
-            return count($contextMatchingCandidates) ? $contextMatchingCandidates : $candidates;
-        }
-        return $candidates;
-    }
-
     public function setConfig($config)
     {
         $this->config = $config;
+    }
+
+    protected function filterByParamCount($candidates)
+    {
+        return $candidates;
+    }
+
+    protected function filterByContext($candidates)
+    {
+        return $candidates;
     }
 }
