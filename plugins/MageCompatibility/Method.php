@@ -64,7 +64,7 @@ class Method extends Tag
     /**
      * validate param type for {$offset}th param
      * !!!will return true if we are not sure about the type!!!
-     * 
+     *
      * @param int    $offset Param offset
      * @param string $type   Doctype styled type
      * @return bool
@@ -106,11 +106,12 @@ class Method extends Tag
         $token = 'function ' . $name;
         $command = 'grep -rEl "' . $token . '" ' . $extensionPath . '/app';
         exec($command, $filesWithThatToken, $return);
+        return (0 < count($filesWithThatToken));
     }
 
     /**
      * examine return type of the method
-     * 
+     *
      * @return string
      */
     public function getReturnType()
@@ -119,10 +120,10 @@ class Method extends Tag
     }
 
     /**
-     * getContextArray 
-     * 
+     * getContextArray
+     *
      * @TODO
-     * @param mixed $contextString 
+     * @param mixed $contextString
      * @return void
      */
     protected function getContextArray($contextString)
@@ -150,7 +151,7 @@ class Method extends Tag
 
     /**
      * if method is used in given context
-     * 
+     *
      * @TODO
      * @param array $contextTokens
      * @return void
@@ -162,7 +163,7 @@ class Method extends Tag
 
     /**
      * determine signatures matching the given param count
-     * 
+     *
      * @param array $candidates Array of DibiRows
      * @return array
      */
@@ -194,7 +195,7 @@ class Method extends Tag
     /**
      * determine signatures with the same context
      * currently we only check if the class we detected matches the signature
-     * 
+     *
      * @param array $candidates Array of DibiRows
      * @return array
      */

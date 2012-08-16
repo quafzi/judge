@@ -60,12 +60,19 @@ class MageCompatibility implements JudgePlugin
             }
         }
         foreach ($methods as $method) {
-            $context = $method->getContext();
+            $isExtensionMethod = false;
+            $context = current($method->getContext());
             $method->setConfig($this->settings);
             $supportedVersions = $method->getMagentoVersions();
             //echo $context['class'] . '->' . $method->getName() . ' ';
             if (false == is_array($supportedVersions)) {
                 /* method is not known for any Magento version, so it is either a database getter or part of the extension itself */
+                $isExtensionMethod = $method->isExtensionMethod($method->getName(), $extensionPath);
+                if (false === $isExtensionMethod && substr($method->getName(), 0, 3) == 'get') {
+                    echo "possible database getter found in Method ". $method->getName() . PHP_EOL;
+                } elseif (true === $isExtensionMethod) {
+                    echo "possible extension method found: " . $context . '->' . $method->getName() . PHP_EOL;
+                }
                 continue;
             }
             $tagIncompatibleVersions = array_diff($availableVersions, $supportedVersions);
@@ -158,7 +165,7 @@ class MageCompatibility implements JudgePlugin
 
     /**
      * connect to tag database
-     * 
+     *
      * @return void
      */
     protected function connectTagDatabase()
