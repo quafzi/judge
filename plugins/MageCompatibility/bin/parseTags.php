@@ -124,11 +124,11 @@ class TagParser
     {
         $data = array('name' => $name);
         $classData = dibi::fetch('
-            SELECT t.id as classId, s.id as signatureId
+            SELECT t.id as classId, COALESCE(s.id,0) as signatureId
             FROM [classes] t
                 LEFT JOIN [class_signature] ts ON ( t.id = ts.class_id )
-                LEFT JOIN [signatures] s ON ( ts.signature_id = s.id)
-            WHERE s.definition = %s AND name = %s',
+                LEFT JOIN [signatures] s ON ( ts.signature_id = s.id AND s.definition = %s)
+            WHERE name = %s ORDER BY signatureId DESC',
             $codeLine,
             $name
         );
