@@ -63,11 +63,10 @@ class MageCompatibility implements JudgePlugin
             $context = $method->getContext();
             $method->setConfig($this->settings);
             $supportedVersions = $method->getMagentoVersions();
-            if ('__' == $method->getName()) {
-            }
             //echo $context['class'] . '->' . $method->getName() . ' ';
             if (false == is_array($supportedVersions)) {
-                die(var_dump(__FILE__ . ' on line ' . __LINE__ . ':', $method->getName()));
+                /* method is not known for any Magento version, so it is either a database getter or part of the extension itself */
+                continue;
             }
             $tagIncompatibleVersions = array_diff($availableVersions, $supportedVersions);
             foreach ($tagIncompatibleVersions as $version) {
@@ -76,6 +75,7 @@ class MageCompatibility implements JudgePlugin
                     . '(' . implode(', ', $method->getParams()) . ')';
                 if ($extension->hasMethod($method->getName())) {
                     $methodName .= ' [maybe part of the extension]';
+                    continue;
                 }
                 $incompatibleVersions[$version]['methods'][] = $methodName;
             }

@@ -42,8 +42,8 @@ class Tag
             exit;
         }
         $versions = array();
-        if (is_null($result)) {
-            return $versions;
+        if (is_null($result) || 0 == count($result)) {
+            return null;
         }
 
         /* get best matching signature id */
