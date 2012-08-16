@@ -123,28 +123,17 @@ class TagParser
     protected function addClass($name, $path, $codeLine)
     {
         $data = array('name' => $name);
-        if ('Mage_Core_Model_Mysql4_Collection_Abstract' == $name) {
-        $classData = dibi::test('
-            SELECT t.id as classId, s.id as signatureId
-            FROM [classes] t
-                LEFT JOIN [class_signature] ts ON ( t.id = ts.class_id )
-                LEFT JOIN [signatures] s ON ( ts.signature_id = s.id AND s.definition = %s )
-            WHERE name = %s',
-            $codeLine,
-            $name
-        );
-        die();
-        }
         $classData = dibi::fetch('
             SELECT t.id as classId, s.id as signatureId
             FROM [classes] t
                 LEFT JOIN [class_signature] ts ON ( t.id = ts.class_id )
-                LEFT JOIN [signatures] s ON ( ts.signature_id = s.id AND s.definition = %s )
-            WHERE name = %s',
+                LEFT JOIN [signatures] s ON ( ts.signature_id = s.id)
+            WHERE s.definition = %s AND name = %s',
             $codeLine,
             $name
         );
-        if (false === $classData || false == is_numeric($classData->signatureId)) {
+        $signatureId = $classData['signatureId'];
+        if (false === $classData || false == is_numeric($signatureId)) {
             $signatureId = $this->createSignature('c', $codeLine, $path);
             if (false === $classData) {
                 dibi::query('INSERT INTO [classes] %v', $data);
@@ -154,6 +143,7 @@ class TagParser
             }
             dibi::query('INSERT INTO [class_signature] %v', array('class_id' => $classId, 'signature_id' => $signatureId));
         }
+        $this->assignSignatureToMagento($signatureId);
     }
 
     protected function addInterface($name, $path, $codeLine)
@@ -181,7 +171,6 @@ class TagParser
             $constantId = dibi::getInsertId();
             dibi::query('INSERT INTO [constant_signature] %v', array('constant_id' => $constantId, 'signature_id' => $signatureId));
         }
-        $this->assignSignatureToMagento($signatureId);
     }
 
     /**
