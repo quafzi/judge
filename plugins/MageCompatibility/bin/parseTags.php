@@ -109,6 +109,7 @@ class TagParser
                 echo "\r  ➜ $done/" . ($lines-$ignore) . " done ($percent%$timeLeft$memusage, tag line $tagFileLineNumber): $called      ";
 
             }
+            echo "\r  ➜ $done/" . ($lines-$ignore) . " done ($percent%$timeLeft$memusage, tag line $tagFileLineNumber): finished $call        \n";
         }
     }
 
@@ -132,8 +133,7 @@ class TagParser
             $codeLine,
             $name
         );
-        $signatureId = $classData['signatureId'];
-        if (false === $classData || false == is_numeric($signatureId)) {
+        if (false === $classData || 0 == $classData->signatureId) {
             $signatureId = $this->createSignature('c', $codeLine, $path);
             if (false === $classData) {
                 dibi::query('INSERT INTO [classes] %v', $data);
@@ -142,6 +142,8 @@ class TagParser
                 $classId = $classData->classId;
             }
             dibi::query('INSERT INTO [class_signature] %v', array('class_id' => $classId, 'signature_id' => $signatureId));
+        } else {
+            $signatureId = $classData->signatureId;
         }
         $this->assignSignatureToMagento($signatureId);
     }
