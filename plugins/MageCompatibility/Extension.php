@@ -206,6 +206,14 @@ class Extension
         if (false == is_null($lastAssignment)) {
             return $this->getResultType(current($lastAssignment->xpath('./subNode:expr')));
         }
+        $isParamXpath = sprintf(
+            './ancestor::node:Stmt_ClassMethod/subNode:params/scalar:array/node:Param[subNode:name/scalar:string/text() = "%s"]/subNode:type/node:Name/subNode:parts/scalar:array/scalar:string/text()',
+            $variableName
+        );
+        $paramTypes = $node->xpath($isParamXpath);
+        if ($paramTypes) {
+            return current($paramTypes);
+        }
         return $type;
     }
 

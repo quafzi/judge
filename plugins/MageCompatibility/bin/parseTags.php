@@ -82,7 +82,9 @@ class TagParser
                 }
 
                 if ($currentType == $type) {
+                    dibi::begin();
                     $this->$call($tag, $path, trim($codeLine));
+                    dibi::commit();
                     ++$done;
                     $called = $call;
                 } else {
