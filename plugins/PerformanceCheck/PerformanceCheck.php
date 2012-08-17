@@ -33,9 +33,10 @@ class PerformanceCheck implements JudgePlugin
         $this->extensionPath = $extensionPath;
         $settings = $this->config->plugins->{$this->name};
         $score = $settings->good;
+        $foundTokens = 0;
         foreach ($this->settings->performanceKillerPattern as $performanceKiller) {
             $filesWithThatToken = array();
-            $command = 'grep -riEl "' . $performanceKiller . '" ' . $extensionPath . '/app';
+            $command = 'grep -riElz "' . $performanceKiller . '" ' . $extensionPath . '/app';
             exec($command, $filesWithThatToken, $return);
             if (0 < count($filesWithThatToken)) {
                 $score = $this->settings->bad;
