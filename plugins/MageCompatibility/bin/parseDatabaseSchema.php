@@ -2,16 +2,10 @@
 if (count($argv) < 3) {
     die('Call with ' . __FILE__ . ' {path to magento} {database name}' . PHP_EOL);
 }
-$pathToMagentoBaseDir = $argv[1];
+$branch = $argv[1];
 $databaseName = $argv[2];
-if (substr($pathToMagentoBaseDir, -1) != '/') {
-    $pathToMagentoBaseDir .= '/';
-}
-if (false === file_exists($pathToMagentoBaseDir . '/app/Mage.php')) {
-    die('Are you sure, there is a Magento? Couldn\'t find Mage.php!' . PHP_EOL);
-}
 
-$parser = new DatabaseParser($pathToMagentoBaseDir, $databaseName);
+$parser = new DatabaseParser($branch, $databaseName);
 $parser->run();
 
 class DatabaseParser
@@ -25,17 +19,16 @@ class DatabaseParser
     protected $resourceModelNames;
     protected $classIdentifiers;
 
-    public function __construct($pathToMagentoBaseDir, $databaseName)
+    public function __construct($branch, $databaseName)
     {
         $this->basedir = realpath(dirname(__FILE__) . '/../../../');
         require_once $this->basedir . '/vendor/dg/dibi/dibi/dibi.php';
 
         $this->databaseName = $databaseName;
-        $this->pathToMagentoBaseDir = $pathToMagentoBaseDir;
 
-        $this->verifyMagento($pathToMagentoBaseDir);
-        $this->createJumpstormIni();
+        $this->createJumpstormIni($branch);
         $this->setUpEnv();
+        $this->verifyMagento($this->pathToMagentoBaseDir);
 
         dibi::connect(array(
             //'driver'   => 'sqlite3',
@@ -62,14 +55,13 @@ class DatabaseParser
         echo 'Analyzing Magento ' . $this->version . ' (' . $this->edition . ' Edition)...' . PHP_EOL;
     }
 
-    protected function createJumpstormIni()
+    protected function createJumpstormIni($branch)
     {
         $config = file_get_contents($this->basedir . '/plugins/MageCompatibility/var/base.jumpstorm.ini');
-        $branch = strtolower($this->edition) . '-' . $this->version;
-        $branch = str_replace('community', 'magento', $branch);
         $this->jumpstormConfigFile = $this->basedir . '/plugins/MageCompatibility/var/tmp.jumpstorm.ini';
         $config = str_replace('###branch###', $branch, $config);
         $config = str_replace('###target###', $this->basedir . '/tmp/' . $branch, $config);
+        $this->pathToMagentoBaseDir = $this->basedir . '/tmp/' . $branch . '/';
         $config = str_replace('###database###', $this->databaseName, $config);
         file_put_contents($this->jumpstormConfigFile, $config);
     }
@@ -186,7 +178,7 @@ class DatabaseParser
 
     protected function setUpEnv()
     {
-        echo 'Setting Up Magento environment via jumpström';
+        echo 'Setting Up Magento environment via jumpström' . PHP_EOL;
         $iniFile = $this->jumpstormConfigFile;
         $installMagentoCommand = 'magento -v -c ' . $iniFile;
         $executable = $this->basedir . '/vendor/netresearch/jumpstorm/jumpstorm';
