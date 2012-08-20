@@ -8,8 +8,8 @@ class Extension
     protected $usedClasses;
     protected $usedMethods;
 
-	/** @var mixed $methods Array of methods defined in this extension */
-	protected $methods;
+    /** @var mixed $methods Array of methods defined in this extension */
+    protected $methods;
 
     public function __construct($extensionPath)
     {
@@ -143,9 +143,9 @@ class Extension
             }
         } elseif ($node->xpath('./node:Name')) {
             $type = current(current($node->xpath('./node:Name/subNode:parts/scalar:array/scalar:string/text()')));
-			if ('parent' == $type) {
-				return $this->getParentClass($node);
-			}
+            if ('parent' == $type) {
+                return $this->getParentClass($node);
+            }
         } elseif ($node->xpath('./node:Expr_Variable')) {
             $type = $this->getTypeOfVariable($node);
         } elseif ($node->xpath('./node:Scalar_String')) {
@@ -158,18 +158,18 @@ class Extension
                 $type = Method::TYPE_INT;
             }
         }
-        
+
         return $type;
     }
 
-	protected function getParentClass($node)
-	{
-		$extends = $node->xpath('./ancestor::node:Stmt_Class/subNode:extends/node:Name/subNode:parts/scalar:array/scalar:string/text()');
-		if ($extends && 0 < count($extends)) {
-			return current(current($extends));
-		}
-		throw new \Exception('Extension uses parent without extending another class');
-	}
+    protected function getParentClass($node)
+    {
+        $extends = $node->xpath('./ancestor::node:Stmt_Class/subNode:extends/node:Name/subNode:parts/scalar:array/scalar:string/text()');
+        if ($extends && 0 < count($extends)) {
+            return current(current($extends));
+        }
+        throw new \Exception('Extension uses parent without extending another class');
+    }
 
     protected function getTypeOfVariable($node)
     {
@@ -243,9 +243,9 @@ class Extension
     }
 
     /**
-     * collect method calls 
-     * 
-     * @param PHPParser_Node_Stmt $stmt 
+     * collect method calls
+     *
+     * @param PHPParser_Node_Stmt $stmt
      * @return int Number of called methods
      */
     protected function collectMethodCalls($stmt, $xmlTree)
@@ -260,17 +260,17 @@ class Extension
                 $args[$pos] = $this->getResultType($arg, true);
             }
 
-			$variable = current($call->xpath('./subNode:var | ./subNode:class'));
+            $variable = current($call->xpath('./subNode:var | ./subNode:class'));
             $object = $this->getResultType($variable);
-			if (false == $this->isExtensionMethod($object, $methodName)) {
-				$method = new Method(
-					$methodName,
-					$args,
-					array('class' => $object)
-				);
-			} else {
-				continue;
-			}
+            if (false == $this->isExtensionMethod($object, $methodName)) {
+                $method = new Method(
+                    $methodName,
+                    $args,
+                    array('class' => $object)
+                );
+            } else {
+                continue;
+            }
             ++$numberOfMethodCalls;
             $this->usedMethods->add($method);
         }
@@ -279,42 +279,42 @@ class Extension
 
     protected function isExtensionMethod($className, $methodName)
     {
-		$classPath = current(glob($this->extensionPath . '/app/code/*/' . str_replace('_', DIRECTORY_SEPARATOR, $className) . '.php'));
-		if (file_exists($classPath)) {
-			$command = sprintf('grep -i "function %s" %s', $methodName, $classPath);
-			exec($command, $output, $notFound);
-			return 0 === $notFound;
-		}
-		return false;
+        $classPath = current(glob($this->extensionPath . '/app/code/*/' . str_replace('_', DIRECTORY_SEPARATOR, $className) . '.php'));
+        if (file_exists($classPath)) {
+            $command = sprintf('grep -i "function %s" %s', $methodName, $classPath);
+            exec($command, $output, $notFound);
+            return 0 === $notFound;
+        }
+        return false;
     }
 
-	/**
-	 * get an array of methods associated to the file they are defined in
-	 * 
-	 * @return array
-	 */
-	public function getMethods()
-	{
-		if (is_null($this->methods)) {
-			$this->methods = array();
-			$command = sprintf( 'grep -oriE " function ([a-zA-Z0-9_]*)" %s', $this->extensionPath . '/app/code/');
-			exec($command, $output);
-			foreach ($output as $line) {
-				list($path, $method) = explode(':', $line);
-				$this->methods[trim(str_replace('function', '', $method))] = trim(substr_replace($this->extensionPath, '', $path));
-			}
-		}
-		return $this->methods;
-	}
+    /**
+     * get an array of methods associated to the file they are defined in
+     *
+     * @return array
+     */
+    public function getMethods()
+    {
+        if (is_null($this->methods)) {
+            $this->methods = array();
+            $command = sprintf( 'grep -oriE " function ([a-zA-Z0-9_]*)" %s', $this->extensionPath . '/app/code/');
+            exec($command, $output);
+            foreach ($output as $line) {
+                list($path, $method) = explode(':', $line);
+                $this->methods[trim(str_replace('function', '', $method))] = trim(substr_replace($this->extensionPath, '', $path));
+            }
+        }
+        return $this->methods;
+    }
 
-	/**
-	 * if extension has a method with the given name
-	 * 
-	 * @param string $methodName 
-	 * @return boolean
-	 */
-	public function hasMethod($methodName)
-	{
-		return array_key_exists($methodName, $this->getMethods());
-	}
+    /**
+     * if extension has a method with the given name
+     *
+     * @param string $methodName
+     * @return boolean
+     */
+    public function hasMethod($methodName)
+    {
+        return array_key_exists($methodName, $this->getMethods());
+    }
 }
