@@ -68,9 +68,7 @@ class MageCompatibility implements JudgePlugin
             if (false == is_array($supportedVersions)) {
                 /* method is not known for any Magento version, so it is either a database getter or part of the extension itself */
                 $isExtensionMethod = $method->isExtensionMethod($method->getName(), $extensionPath);
-                if (false === $isExtensionMethod && substr($method->getName(), 0, 3) == 'get') {
-                    echo "possible database getter found in Method ". $method->getName() . PHP_EOL;
-                } elseif (true === $isExtensionMethod) {
+                if (true === $isExtensionMethod) {
                     echo "possible extension method found: " . $context . '->' . $method->getName() . PHP_EOL;
                 }
                 continue;

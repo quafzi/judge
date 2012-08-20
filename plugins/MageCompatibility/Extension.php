@@ -1,12 +1,17 @@
 <?php
 namespace MageCompatibility;
 
-class Extension
+use MageCompatibility\Extension\Config;
+
+class Extension extends Config
 {
     protected $extensionPath;
 
     protected $usedClasses;
     protected $usedMethods;
+
+    protected $databaseChanges;
+    protected $tables;
 
     /** @var mixed $methods Array of methods defined in this extension */
     protected $methods;
@@ -206,13 +211,17 @@ class Extension
         if (false == is_null($lastAssignment)) {
             return $this->getResultType(current($lastAssignment->xpath('./subNode:expr')));
         }
+        /* if variable is method parameter with type hint */
         $isParamXpath = sprintf(
             './ancestor::node:Stmt_ClassMethod/subNode:params/scalar:array/node:Param[subNode:name/scalar:string/text() = "%s"]/subNode:type/node:Name/subNode:parts/scalar:array/scalar:string/text()',
             $variableName
         );
         $paramTypes = $node->xpath($isParamXpath);
         if ($paramTypes) {
-            return current($paramTypes);
+            $type = current($paramTypes);
+            if (false !== $type && false == is_string($type)) {
+                $type = current($type);
+            }
         }
         return $type;
     }
@@ -232,6 +241,9 @@ class Extension
             $xpath = '/config/*/' . $type . 's/' . $module . '/class/text()';
             $identifierPathParts = explode('_', $path);
             $className = current($extensionConfig->xpath($xpath));
+            if (false !== $className && false == is_string($className)) {
+                $className = current($className);
+            }
             if (false == $className) {
                 $className = 'Mage_' . ucfirst($module) . '_' . ucfirst($type);
             }
@@ -262,6 +274,7 @@ class Extension
 
             $variable = current($call->xpath('./subNode:var | ./subNode:class'));
             $object = $this->getResultType($variable);
+
             if (false == $this->isExtensionMethod($object, $methodName)) {
                 $method = new Method(
                     $methodName,
@@ -277,15 +290,68 @@ class Extension
         return $numberOfMethodCalls;
     }
 
+    /**
+     * if given method is part of the extension
+     *
+     * @param string $className
+     * @param string $methodName
+     * @return boolean
+     */
     protected function isExtensionMethod($className, $methodName)
     {
         $classPath = current(glob($this->extensionPath . '/app/code/*/' . str_replace('_', DIRECTORY_SEPARATOR, $className) . '.php'));
         if (file_exists($classPath)) {
+            if ($this->isExtensionDatabaseAccessor($className, $methodName)) {
+                return true;
+            }
             $command = sprintf('grep -i "function %s" %s', $methodName, $classPath);
-            exec($command, $output, $notFound);
-            return 0 === $notFound;
+            exec($command, $matches, $notFound);
+            if (0 < count($matches)) {
+                return true;
+            }
         }
         return false;
+    }
+
+    /**
+     * if given method is a database field accessor related to a table that is defined by the extension
+     *
+     * @param string $className
+     * @param string $methodName
+     * @return boolean
+     */
+    protected function isExtensionDatabaseAccessor($className, $methodName)
+    {
+        if (3 < strlen($methodName) && in_array(substr($methodName, 0, 3), array('get', 'set', 'uns', 'has'))) {
+            $fieldName = $this->getFieldNameForAccessor($methodName);
+            $changes = $this->getDatabaseChanges();
+            $additionalProperties = $changes['add'];
+            foreach ($additionalProperties as $table=>$fields) {
+                if (false == in_array($fieldName, $fields)) {
+                    continue;
+                }
+            }
+            if ($this->getTableForClass($className) === $table) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    protected function getTableForClass($className)
+    {
+        if (is_null($this->tables)) {
+            $this->tables = $this->getTables($this->extensionPath);
+        }
+if (false == is_string($className)) die(var_dump(__FILE__ . ' on line ' . __LINE__ . ':', $className));
+        if (array_key_exists($className, $this->tables)) {
+            return $this->tables[$className];
+        }
+    }
+
+    protected function getFieldNameForAccessor($methodName)
+    {
+        return strtolower(implode('_', preg_split('/(?<=\\w)(?=[A-Z])/', substr($methodName, 3))));
     }
 
     /**
@@ -316,5 +382,21 @@ class Extension
     public function hasMethod($methodName)
     {
         return array_key_exists($methodName, $this->getMethods());
+    }
+
+    /**
+     * determine database changes made in sql install and/or update scripts
+     */
+    protected function getDatabaseChanges()
+    {
+        if (is_null($this->databaseChanges)) {
+            $this->databaseChanges = array();
+            $scripts = glob($this->extensionPath . '/app/code/*/*/*/sql/*/mysql*');
+            foreach ($scripts as $script) {
+                $setup = new Extension\Setup($script);
+                $this->databaseChanges = array_merge_recursive($this->databaseChanges, $setup->getChanges());
+            }
+        }
+        return $this->databaseChanges;
     }
 }
