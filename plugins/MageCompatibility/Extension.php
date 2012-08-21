@@ -14,6 +14,8 @@ class Extension extends Config
     protected $databaseChanges;
     protected $tables;
 
+    protected $phpMethods;
+
     /** @var mixed $methods Array of methods defined in this extension */
     protected $methods;
 
@@ -279,6 +281,10 @@ class Extension extends Config
             $variable = current($call->xpath('./subNode:var | ./subNode:class'));
             $object = $this->getResultType($variable);
 
+            if ($this->isPhpMethod($object, $methodName)) {
+                continue;
+            }
+
             if ($this->isCallabilityChecked($call, $object, $methodName)) {
                 Logger::addComment(
                     $this->extensionPath,
@@ -290,7 +296,7 @@ class Extension extends Config
 
             if (false == $this->isExtensionMethod($object, $methodName)) {
                 $method = new Method(
-                    $methodName,
+                    (string) $methodName,
                     $this->getArgs($call),
                     array('class' => $object)
                 );
@@ -307,7 +313,7 @@ class Extension extends Config
      * @param SimpleXMLElement $call Method call
      * @return array
      */
-    protected function getArgs(SimpleXMLElement $call)
+    protected function getArgs(\SimpleXMLElement $call)
     {
         $args = $call->xpath('./subNode:args/scalar:array/node:Arg/subNode:value');
         foreach ($args as $pos=>$arg) {
@@ -315,6 +321,26 @@ class Extension extends Config
         }
 
         return $args;
+    }
+
+    protected function isPhpMethod($class, $method)
+    {
+        $method = strtolower((string) $method);
+        if (is_null($this->phpMethods)) {
+            $this->phpMethods = array();
+            exec('php -r "echo implode(PHP_EOL, get_declared_classes());"', $output);
+            foreach ($output as $definedClass) {
+                $this->phpMethods[$definedClass] = get_class_methods($definedClass);
+            }
+        }
+        if (array_key_exists($class, $this->phpMethods)) {
+            foreach ($this->phpMethods[$class] as $phpMethod) {
+                if ($method == strtolower($phpMethod)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /**
