@@ -72,8 +72,8 @@ class Klass extends Tag
             exec($command, $filesWithThatToken, $return);
         } else {
             $filePathPattern = 'app/code/*/*/*/' . $filePathPattern;
-            list($extensionName, $class) = explode('/', $identifier);
-            $classPathItems = explode('_', $class);
+
+            list($extensionName, $classPathItems) = $this->getIdentifierParts($identifier);
             foreach ($classPathItems as $pathItem) {
                 $filePathPattern .= '/' . ucfirst($pathItem);
             }
@@ -88,14 +88,25 @@ class Klass extends Tag
         if (0 < preg_match('/^([a-zA-Z0-9]+_)+[a-zA-Z0-9]+$/', $identifier)) {
             return $identifier;
         }
-        list($extensionName, $class) = explode('/', $identifier);
+        list($extensionName, $classPathItems) = $this->getIdentifierParts($identifier);
         $className = 'Mage_' . ucfirst($extensionName) . '_' . ucfirst($type);
 
-        $classPathItems = explode('_', $class);
         foreach ($classPathItems as $pathItem) {
             $className .= '_' . ucfirst($pathItem);
         }
         return $className;
+    }
+
+    protected function getIdentifierParts($identifier)
+    {
+        $identifierParts = explode('/', $identifier);
+        $class = 'data';
+        $extensionName = $identifierParts[0];
+        if (1 < count($identifierParts)) {
+            $class = $identifierParts[1];
+        }
+        $classPathItems = explode('_', $class);
+        return array($extensionName, $classPathItems);
     }
 }
 
