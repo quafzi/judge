@@ -2,6 +2,7 @@
 namespace MageCompatibility;
 
 use MageCompatibility\Extension\Config;
+use Netresearch\Logger;
 
 class Extension extends Config
 {
@@ -275,6 +276,15 @@ class Extension extends Config
             $variable = current($call->xpath('./subNode:var | ./subNode:class'));
             $object = $this->getResultType($variable);
 
+            if ($this->isCallabilityChecked($call, $object, $methodName)) {
+                Logger::addComment(
+                    $this->extensionPath,
+                    'MageCompatibility',
+                    sprintf('<info>Found version switch</info> for %s::%s', $object, $methodName)
+                );
+                continue;
+            }
+
             if (false == $this->isExtensionMethod($object, $methodName)) {
                 $method = new Method(
                     $methodName,
@@ -288,6 +298,20 @@ class Extension extends Config
             $this->usedMethods->add($method);
         }
         return $numberOfMethodCalls;
+    }
+
+    /**
+     * if existance of the method is checked before call
+     *
+     * @param SimpleXMLElement $call PHPParser_Parser xml
+     * @param string $variable       class name or variable with that object
+     * @param string $methodName     method name
+     * @return void
+     */
+    protected function isCallabilityChecked($call, $variable, $methodName)
+    {
+        $xpath = sprintf('./ancestor::node:Stmt_If/subNode:cond/node:Expr_FuncCall[subNode:name/node:Name/subNode:parts/scalar:array/scalar:string/text() = "is_callable"]/subNode:args/scalar:array/node:Arg/subNode:value/node:Scalar_String/subNode:value/scalar:string[text() = "%s"]', "$variable::$methodName");
+        return (count($call->xpath($xpath)));
     }
 
     /**
