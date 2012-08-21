@@ -158,6 +158,8 @@ class Extension extends Config
             $type = $this->getTypeOfVariable($node);
         } elseif ($node->xpath('./node:Scalar_String')) {
             $type = Method::TYPE_STRING;
+        } elseif ($node->xpath('./node:Expr_New')) {
+            $type = (string) current($node->xpath('./node:Expr_New/subNode:class/node:Name/subNode:parts/scalar:array/scalar:string/text()'));
         } elseif ($node->xpath('./node:Expr_MethodCall')) {
             $methodName = current($node->xpath('./node:Expr_MethodCall/subNode:name/scalar:string/text()'));
             if ('load' == $methodName) {
@@ -179,6 +181,12 @@ class Extension extends Config
         throw new \Exception('Extension uses parent without extending another class');
     }
 
+    /**
+     * determine type of a variable
+     *
+     * @param SimpleXMLElement $node
+     * @return string
+     */
     protected function getTypeOfVariable($node)
     {
         $type = Method::TYPE_MIXED;
@@ -194,26 +202,14 @@ class Extension extends Config
         if (false === $currentMethod) {
             return $type;
         }
-        $variableDefinitionXpath = sprintf(
-            './descendant::node:Expr_Assign[subNode:var/node:Expr_Variable/subNode:name/scalar:string/text() = "%s"]',
-            $variableName
-        );
-        $variableDefinitions = $currentMethod->xpath($variableDefinitionXpath);
-        $lastAssignmentLine = 0;
-        $lastAssignment = null;
-        foreach ($variableDefinitions as $key=>$assignment) {
-            $assignmentLine = (int) current($assignment->xpath('./attribute:endLine/scalar:int/text()'));
-            if ($usedInLine < $assignmentLine) {
-                continue;
-            }
-            if ($lastAssignmentLine <= $assignmentLine) {
-                $lastAssignmentLine = $assignmentLine;
-                $lastAssignment = $assignment;
-            }
+
+        $definedInLine = 0;
+        $lastAssignment = $this->getLastAssignment($currentMethod, $variableName, $usedInLine);
+        if (is_array($lastAssignment)) {
+            $definedInLine = key($lastAssignment);
+            $type = current($lastAssignment);
         }
-        if (false == is_null($lastAssignment)) {
-            return $this->getResultType(current($lastAssignment->xpath('./subNode:expr')));
-        }
+
         /* if variable is method parameter with type hint */
         $isParamXpath = sprintf(
             './ancestor::node:Stmt_ClassMethod/subNode:params/scalar:array/node:Param[subNode:name/scalar:string/text() = "%s"]/subNode:type/node:Name/subNode:parts/scalar:array/scalar:string/text()',
@@ -227,6 +223,37 @@ class Extension extends Config
             }
         }
         return $type;
+    }
+
+    /**
+     * get last assignment to that variable
+     *
+     * @param SimpleXMLElement $method
+     * @param string           $variableName 
+     * @return array(line => type) || NULL
+     */
+    protected function getLastAssignment(\SimpleXMLElement $method, $variableName, $usedInLine)
+    {
+        $variableDefinitionXpath = sprintf(
+            './descendant::node:Expr_Assign[subNode:var/node:Expr_Variable/subNode:name/scalar:string/text() = "%s"]',
+            $variableName
+        );
+        $variableDefinitions = $method->xpath($variableDefinitionXpath);
+        $lastAssignmentLine = 0;
+        $lastAssignment = null;
+        foreach ($variableDefinitions as $key=>$assignment) {
+            $assignmentLine = (int) current($assignment->xpath('./attribute:endLine/scalar:int/text()'));
+            if ($usedInLine < $assignmentLine) {
+                continue;
+            }
+            if ($lastAssignmentLine <= $assignmentLine) {
+                $lastAssignmentLine = $assignmentLine;
+                $lastAssignment = $assignment;
+            }
+        }
+        if (false == is_null($lastAssignment)) {
+            return array($lastAssignmentLine => $this->getResultType(current($lastAssignment->xpath('./subNode:expr'))));
+        }
     }
 
     protected function getClassName($type, $identifier)
