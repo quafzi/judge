@@ -46,6 +46,7 @@ class TagParser
             'i' => 'addInterface', // interfaces
             'd' => 'addConstant',  // constant definitions
             'f' => 'addMethod',    // functions
+            'm' => 'addMethod',    // functions
             /* tag types to be ignored
             'v' => 'addVariable',  // variables
             'j' => 'addJavascript' // javascript functions

@@ -1,14 +1,18 @@
 <?php
+namespace MageCompatibility;
+
+use MageCompatibility\Extension\Config;
+use MageCompatibility\DatabaseParser;
+
+include realpath(dirname(__FILE__) . '/../Extension/Config.php');
+
 if (count($argv) < 3) {
     die('Call with ' . __FILE__ . ' {path to magento} {database name}' . PHP_EOL);
 }
 $branch = $argv[1];
 $databaseName = $argv[2];
 
-$parser = new DatabaseParser($branch, $databaseName);
-$parser->run();
-
-class DatabaseParser
+class DatabaseParser extends Config
 {
     protected $pathToMagentoBaseDir;
     protected $databaseName;
@@ -30,7 +34,7 @@ class DatabaseParser
         $this->setUpEnv();
         $this->verifyMagento($this->pathToMagentoBaseDir);
 
-        dibi::connect(array(
+        \dibi::connect(array(
             //'driver'   => 'sqlite3',
             //'database' => $basedir . '/plugins/MageCompatibility/var/tags.sqlite'
             'driver'   => 'mysql',
@@ -44,9 +48,9 @@ class DatabaseParser
     {
         include $pathToMagentoBaseDir . 'app/Mage.php';
 
-        $this->version = Mage::getVersion();
+        $this->version = \Mage::getVersion();
         if (method_exists('Mage', 'getEdition')) {
-            $this->edition = Mage::getEdition();
+            $this->edition = \Mage::getEdition();
         } else {
             preg_match('/^1\.(\d+)\./', $this->version, $matches);
             $majorRelease = $matches[1];
@@ -74,106 +78,60 @@ class DatabaseParser
 
     public function run()
     {
-        $tables = $this->getTables();
+        $tables = $this->getTables($this->pathToMagentoBaseDir);
         foreach ($tables as $class=>$tableName) {
             $this->writeMethodsForFlatTable($class, $tableName);
         }
 
         $eavEntities = $this->getEavEntities(array_keys($tables));
         foreach ($eavEntities as $class) {
-            $this->addMethodsForEavAttributes($class, $tables[$class]);
+            $this->writeMethodsForEavAttributes($class, $tables[$class]);
         }
     }
 
     protected function writeMethodsForFlatTable($class, $tableName)
     {
         try {
-            $fields = dibi::query('DESCRIBE [' . $tableName . ']');
-            $this->writeMethodsForFields($class, $tableName, $fields);
-        } catch (Exception $e) {
+            $fields = \dibi::query('DESCRIBE [' . $tableName . ']');
+            $this->writeMethodsForFields($class, $tableName, $fields, 'flat');
+        } catch (\Exception $e) {
             // skip non-existing tables
         }
     }
 
-    protected function writeMethodsForFields($class, $tableName, $fields)
+    protected function writeMethodsForEavAttributes($model, $table)
+    {
+        $query = 'SELECT attribute_code as Field
+            FROM eav_attribute a
+            JOIN eav_entity_type t ON t.entity_type_id = a.entity_type_id
+            WHERE entity_model = %s';
+        $this->writeMethodsForFields($model, $table, \dibi::query($query, $this->classIdentifiers[$model]), 'eav');
+    }
+
+    protected function writeMethodsForFields($class, $tableName, $fields, $type)
     {
         $lines = array();
         foreach ($fields as $row) {
-            $lines[] = $this->getTaglineForField($class, $tableName, $row->Field, 'get', '$value=null');
-            $lines[] = $this->getTaglineForField($class, $tableName, $row->Field, 'set', '$value=null');
-            $lines[] = $this->getTaglineForField($class, $tableName, $row->Field, 'uns', '$value=null');
-            $lines[] = $this->getTaglineForField($class, $tableName, $row->Field, 'has', '$value=null');
+            $lines[] = $this->getTaglineForField($class, $tableName, $row->Field, $type, 'get', '$value=null');
+            $lines[] = $this->getTaglineForField($class, $tableName, $row->Field, $type, 'set', '$value=null');
+            $lines[] = $this->getTaglineForField($class, $tableName, $row->Field, $type, 'uns', '$value=null');
+            $lines[] = $this->getTaglineForField($class, $tableName, $row->Field, $type, 'has', '$value=null');
         }
         file_put_contents($this->getTagFileName(), $lines, FILE_APPEND);
     }
 
-    protected function getTaglineForField($class, $tableName, $fieldName, $prefix, $params='')
+    protected function getTaglineForField($class, $tableName, $fieldName, $type, $prefix, $params='')
     {
         $camelCaseFieldName = str_replace(' ', '', ucwords(str_replace('_', ' ', $fieldName)));
         $methodName = $prefix . $camelCaseFieldName;
         $method = array(
             'name'     => $methodName,
-            'path'     => "database[$class]",
+            'path'     => "database[$class/$fieldName/$type/$tableName]",
             'codeLine' => "/^public function $methodName($params)$/;\"",
-            'type'     => 'm',
+            'type'     => 'f',
             'line'     => 'line:[magic]'
         );
         return implode("\t", $method) . PHP_EOL;
-    }
-
-    /**
-     * get an array of tables associated to the model they belong to
-     * 
-     * @return array (class => tableName)
-     */
-    protected function getTables()
-    {
-        $tables = array();
-        $configFiles = $this->getConfigFilesWithTableDefinitions();
-        foreach ($configFiles as $configFile) {
-            $tables = array_merge($tables, $this->getTablesForConfig($configFile));
-        }
-        return $tables;
-    }
-
-    /**
-     * get list of config.xml files containing a table definition
-     * 
-     * @return array
-     */
-    protected function getConfigFilesWithTableDefinitions()
-    {
-        $command = 'grep -rl -m1 --include "config.xml" "\<table>" ' . $this->pathToMagentoBaseDir;
-        exec($command, $configFiles);
-        return $configFiles;
-    }
-
-    /**
-     * get an array of tables defined in a config.xml, associated to the model they belong to
-     * 
-     * @return array (class => tableName)
-     */
-    protected function getTablesForConfig($configFile)
-    {
-        $tables = array();
-        $config = simplexml_load_file($configFile);
-        $resourceModelNodes = $config->xpath('./global/models//resourceModel');
-        foreach ($resourceModelNodes as $resourceModelNode) {
-            $resourceModelNodeName = current($resourceModelNode->xpath('./text()'));
-            $classPrefix = current($resourceModelNode->xpath('../class/text()'));
-            $entityNodes = $config->xpath('./global/models/' . $resourceModelNodeName . '/entities/*');
-            foreach ($entityNodes as $entityNode) {
-                $classNameWithoutPrefix = str_replace(' ', '_', ucwords(str_replace('_', ' ', $entityNode->getName())));
-                $className = $classPrefix . '_' . $classNameWithoutPrefix;
-                $tableName = current($entityNode->xpath('./table/text()'));
-                $tables[$className] = (string) $tableName;
-                $resourcePrefix = current($entityNode->xpath('../../class/text()'));
-                $this->resourceModelNames[$className] = $resourcePrefix . '_' . $classNameWithoutPrefix;
-                $identifierPrefix = current($resourceModelNode->xpath('..'))->getName();
-                $this->classIdentifiers[$className] = $identifierPrefix . '/' . $entityNode->getName();
-            }
-        }
-        return $tables;
     }
 
     protected function setUpEnv()
@@ -182,7 +140,10 @@ class DatabaseParser
         $iniFile = $this->jumpstormConfigFile;
         $installMagentoCommand = 'magento -v -c ' . $iniFile;
         $executable = $this->basedir . '/vendor/netresearch/jumpstorm/jumpstorm';
-        passthru(sprintf('%s %s', $executable, $installMagentoCommand));
+        passthru(sprintf('%s %s', $executable, $installMagentoCommand), $error);
+        if ($error) {
+            die('Installation failed!');
+        }
     }
 
     protected function getEavEntities($models)
@@ -217,13 +178,7 @@ class DatabaseParser
         }
         return $this->isEavModel($parentClass);
     }
-
-    protected function addMethodsForEavAttributes($model, $table)
-    {
-        $query = 'SELECT attribute_code as Field
-            FROM eav_attribute a
-            JOIN eav_entity_type t ON t.entity_type_id = a.entity_type_id
-            WHERE entity_model = %s';
-        $this->writeMethodsForFields($model, $table, dibi::query($query, $this->classIdentifiers[$model]));
-    }
 }
+
+$parser = new DatabaseParser($branch, $databaseName);
+$parser->run();
