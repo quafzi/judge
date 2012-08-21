@@ -66,11 +66,12 @@ class MageCompatibility implements JudgePlugin
             $supportedVersions = $method->getMagentoVersions();
             //echo $context['class'] . '->' . $method->getName() . ' ';
             if (false == is_array($supportedVersions)) {
-                /* method is not known for any Magento version, so it is either a database getter or part of the extension itself */
+                /* method is not known for any Magento version, so it is either a database getter or part of the extension itself
                 $isExtensionMethod = $method->isExtensionMethod($method->getName(), $extensionPath);
                 if (true === $isExtensionMethod) {
                     echo "possible extension method found: " . $context . '->' . $method->getName() . PHP_EOL;
                 }
+                */
                 continue;
             }
             $tagIncompatibleVersions = array_diff($availableVersions, $supportedVersions);
