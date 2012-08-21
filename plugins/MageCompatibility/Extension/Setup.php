@@ -7,6 +7,8 @@ class Setup
         'add' => array()
     );
 
+    protected $connection;
+
     public function __construct($file)
     {
         include $file;
@@ -27,7 +29,7 @@ class Setup
 
     public function getChanges()
     {
-        return $this->changes;
+        return array_merge($this->changes, $this->getConnection()->getChanges());
     }
 
     /**
@@ -39,6 +41,14 @@ class Setup
     public function getTable($tableName)
     {
         return $tableName;
+    }
+
+    public function getConnection()
+    {
+        if (is_null($this->connection)) {
+            $this->connection = new Setup\Connection();
+        }
+        return $this->connection;
     }
 
     protected function evaluateQueries($queryClob)
