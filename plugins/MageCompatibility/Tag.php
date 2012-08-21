@@ -38,8 +38,7 @@ class Tag
             $result = dibi::query($query, $this->getName());
         } catch (\DibiDriverException $e) {
             dibi::test($query, $this->getName());
-            //die(var_dump(__FILE__ . ' on line ' . __LINE__ . ':', $this, $e->getMessage(), $query));
-            exit;
+            throw $e;
         }
         $versions = array();
         if (is_null($result) || 0 == count($result)) {
@@ -54,7 +53,7 @@ class Tag
                 $signatureIds = array_keys($result->fetchPairs());
             } catch (\DibiDriverException $e) {
                 dibi::test($query, $signatureId);
-                exit;
+                throw $e;
             }
         }
         if (false == is_array($signatureIds) || 0 == count($signatureIds)) {
@@ -73,8 +72,7 @@ class Tag
             return dibi::fetchPairs($query, $signatureIds);
         } catch (\DibiDriverException $e) {
             dibi::test($query, $signatureId);
-            //die(var_dump(__FILE__ . ' on line ' . __LINE__ . ':', $this, $e->getMessage(), $query));
-            exit;
+            throw $e;
         }
     }
 
