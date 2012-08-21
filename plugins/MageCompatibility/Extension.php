@@ -267,10 +267,13 @@ class Extension extends Config
         $methodCallXPath = '//node:Expr_MethodCall | //node:Expr_StaticCall';
         $methodCalls = $xmlTree->xpath($methodCallXPath);
         foreach ($methodCalls as $call) {
-            $methodName = current(current($call->xpath('./subNode:name/scalar:string/text()')));
-            $args = $call->xpath('./subNode:args/scalar:array/node:Arg/subNode:value');
-            foreach ($args as $pos=>$arg) {
-                $args[$pos] = $this->getResultType($arg, true);
+            $methodName = $call->xpath('./subNode:name/scalar:string/text()');
+            if (false === $methodName) {
+                continue;
+            }
+            $methodName = current($methodName);
+            if (is_array($methodName)) {
+                $methodName = current($methodName);
             }
 
             $variable = current($call->xpath('./subNode:var | ./subNode:class'));
@@ -288,16 +291,30 @@ class Extension extends Config
             if (false == $this->isExtensionMethod($object, $methodName)) {
                 $method = new Method(
                     $methodName,
-                    $args,
+                    $this->getArgs($call),
                     array('class' => $object)
                 );
-            } else {
-                continue;
+                ++$numberOfMethodCalls;
+                $this->usedMethods->add($method);
             }
-            ++$numberOfMethodCalls;
-            $this->usedMethods->add($method);
         }
         return $numberOfMethodCalls;
+    }
+
+    /**
+     * determine parameter types
+     *
+     * @param SimpleXMLElement $call Method call
+     * @return array
+     */
+    protected function getArgs(SimpleXMLElement $call)
+    {
+        $args = $call->xpath('./subNode:args/scalar:array/node:Arg/subNode:value');
+        foreach ($args as $pos=>$arg) {
+            $args[$pos] = $this->getResultType($arg, true);
+        }
+
+        return $args;
     }
 
     /**
@@ -349,6 +366,9 @@ class Extension extends Config
         if (3 < strlen($methodName) && in_array(substr($methodName, 0, 3), array('get', 'set', 'uns', 'has'))) {
             $fieldName = $this->getFieldNameForAccessor($methodName);
             $changes = $this->getDatabaseChanges();
+            if (false === array_key_exists('add', $changes)) {
+                return false;
+            }
             $additionalProperties = $changes['add'];
             foreach ($additionalProperties as $table=>$fields) {
                 if (false == in_array($fieldName, $fields)) {
@@ -367,7 +387,6 @@ class Extension extends Config
         if (is_null($this->tables)) {
             $this->tables = $this->getTables($this->extensionPath);
         }
-if (false == is_string($className)) die(var_dump(__FILE__ . ' on line ' . __LINE__ . ':', $className));
         if (array_key_exists($className, $this->tables)) {
             return $this->tables[$className];
         }
