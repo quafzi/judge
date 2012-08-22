@@ -202,15 +202,16 @@ class Method extends Tag
     protected function filterByContext($candidates)
     {
         if (false === array_key_exists('class', $this->context)
-            && 0 < strlen($this->context['class']
+            && 0 < strlen($this->context['class'])
             && Method::TYPE_MIXED !== $this->context['class']
             && 0 < count($candidates)
-            && current($candidates)->class_id)
         ) {
             $classIds = array();
             $query = 'SELECT name, id FROM [classes] WHERE id IN (%s) AND name=%s';
             foreach ($candidates as $key=>$candidate) {
-                $classIds[$key] = $candidate->class_id;
+                if ($candidate->class_id) {
+                    $classIds[$key] = $candidate->class_id;
+                }
             }
             try {
                 $result = dibi::fetchPairs(
