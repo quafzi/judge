@@ -361,6 +361,13 @@ class TagParser
 
     public function getClassNameForPath($path)
     {
+        if (0 === strpos($path, 'database[')) {
+            /* if that is a database accessor we already have the class name in the path */
+            if (preg_match('/^database\[([^\/]+)/', $path, $matches)) {
+                return $matches[1];
+            }
+            return '';
+        }
         $fileExtensions = explode('.', $path);
 
         if (!in_array(end($fileExtensions), array('php'))) {
