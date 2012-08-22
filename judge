@@ -6,6 +6,9 @@ require 'lib/Zend/Exception.php';
 require 'lib/Zend/Config.php';
 require 'lib/Zend/Config/Exception.php';
 require 'lib/Zend/Config/Ini.php';
+require 'lib/Zend/Config/Writer.php';
+require 'lib/Zend/Config/Writer/FileAbstract.php';
+require 'lib/Zend/Config/Writer/Ini.php';
 
 require_once __DIR__.'/lib/Symfony/Component/ClassLoader/UniversalClassLoader.php';
 

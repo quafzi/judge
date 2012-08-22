@@ -5,7 +5,7 @@ class Config
 {
     /**
      * get an array of tables associated to the model they belong to
-     * 
+     *
      * @return array (class => tableName)
      */
     protected function getTables($path)
@@ -32,7 +32,7 @@ class Config
 
     /**
      * get an array of tables defined in a config.xml, associated to the model they belong to
-     * 
+     *
      * @return array (class => tableName)
      */
     protected function getTablesForConfig($configFile)
@@ -56,5 +56,27 @@ class Config
             }
         }
         return $tables;
+    }
+
+
+    protected function getConfigFilesWithPhpUnitSuites($path)
+    {
+        $command = 'grep -rl -m1 --include "config.xml" "\<phpunit>" ' . $path;
+        exec($command, $configFiles);
+        return $configFiles;
+    }
+
+    public function getUnitTestPrefixes($path)
+    {
+        $configFiles = $this->getConfigFilesWithPhpUnitSuites($path);
+        $modulePrefixes = array();
+        foreach ($configFiles as $configFile) {
+            $config = simplexml_load_file($configFile);
+            $moduleNames = $config->xpath('//phpunit/suite/modules/*');
+            foreach ($moduleNames as $moduleName) {
+                $modulePrefixes[] = $moduleName->getName();
+            }
+        }
+        return $modulePrefixes;
     }
 }
