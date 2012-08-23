@@ -11,6 +11,7 @@ class MageCompatibility implements JudgePlugin
 {
     protected $config   = null;
     protected $name     = null;
+    protected $settings = null;
 
     public function __construct(Config $config)
     {
@@ -138,10 +139,9 @@ class MageCompatibility implements JudgePlugin
         if ($this->containsNoLatestVersion(array_keys($incompatibleVersions), 'CE')) {
             Logger::success(sprintf('Extension supports Magento at least from version %s', $this->settings->min->ce));
             Logger::setScore($extensionPath, current(explode('\\', __CLASS__)), $this->settings->good);
-        } else {
-            Logger::setScore($extensionPath, current(explode('\\', __CLASS__)), $this->settings->bad);
+            return $this->settings->good;
         }
-
+        Logger::setScore($extensionPath, current(explode('\\', __CLASS__)), $this->settings->bad);
         return $this->settings->bad;
     }
 
@@ -200,7 +200,7 @@ class MageCompatibility implements JudgePlugin
         /* for now we assume, all versions start with "1." */
         $min = (int) str_replace('.', '', $this->settings->min->ce);
         foreach ($incompatibleVersions as $currentVersion) {
-            $current = (int) str_replace('.', '', $currentVersion);
+            $current = (int) str_replace('.', '', substr($currentVersion, 3));
             if ($min < $current) {
                 return false;
             }
