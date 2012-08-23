@@ -22,6 +22,7 @@ class Rewrites implements JudgePlugin
 
     public function execute($extensionPath)
     {
+        $score = 0;
         $settings = $this->config->plugins->{$this->name};
         $this->extensionPath = $extensionPath;
 
@@ -36,11 +37,11 @@ class Rewrites implements JudgePlugin
         }
 
         if (count($this->rewrites) <= $settings->allowedRewrites->count) {
-            $score = $settings->allowedRewrites->good;
+            $score += $settings->allowedRewrites->good;
         } elseif ($settings->maxRewrites->count < count($this->rewrites)) {
-            $score = $settings->maxRewrites->good;
+            $score += $settings->maxRewrites->good;
         } else {
-            $score = $settings->maxRewrites->bad;
+            $score += $settings->maxRewrites->bad;
         }
         foreach ($this->rewrites as $rewrite) {
             list($type, $code) = explode('s:', $rewrite);
@@ -50,7 +51,7 @@ class Rewrites implements JudgePlugin
                     $this->name,
                     '<comment>Critical ' . $type . ' rewrite: ' . $code . '</comment>'
                 );
-                $score = $settings->bad;
+                $score += $settings->critical->bad;
             } else {
                 Logger::addComment($this->extensionPath, $this->name, $type . ' rewrite ' . $code);
             }
