@@ -46,7 +46,7 @@ class CodeCoverage implements JudgePlugin
      */
     protected function evaluateTestCoverage($extensionPath)
     {
-        $score = 0;
+        $score = $this->settings->good;
         $executable = 'vendor/EHER/PHPUnit/bin/phpunit';
         $codeCoverages  = array();
         $phpUnitOutput  = array();
@@ -54,48 +54,55 @@ class CodeCoverage implements JudgePlugin
         if (isset($this->settings->PHPUnitParams)) {
             $paramsArray = $this->settings->PHPUnitParams->toArray();
         }
-        $modulePrefixString = implode(' ', $this->modulePrefixes);
-        $phpUnitCoverageFile = 'codecoverage.xml';
-        $params = '--coverage-clover ' . $phpUnitCoverageFile .' --filter ' . $modulePrefixString;
-        if (0 < count($paramsArray)) {
-            $params .= ' ' . implode(' ', $paramsArray);
-        }
-        $execString = $executable . ' ' . $params . ' ' .  $this->config->common->magento->target . DIRECTORY_SEPARATOR . 'UnitTests.php';
-        exec($execString, $phpUnitOutput);
-        $pdependSummaryFile = 'summary.xml';
-        $execString = sprintf('vendor/pdepend/pdepend/src/bin/pdepend --summary-xml="%s" "%s"', $pdependSummaryFile, $extensionPath);
-        exec($execString);
-        $phpUnitXpath = "//class[starts-with(@name, '" . $modulePrefixString . "')]/../metrics";
-        $codeCoverages = $this->evaluateCodeCoverage($phpUnitCoverageFile, $phpUnitXpath);
-        $codeCoverageSettings = $this->settings->phpUnitCodeCoverages->toArray();
-        foreach (array_keys($codeCoverageSettings) as $codeCoverageType) {
-            if (array_key_exists($codeCoverageType, $codeCoverages)
-                && $codeCoverages[$codeCoverageType] < $codeCoverageSettings[$codeCoverageType]) {
-                Logger::addComment(
-                    $extensionPath,
-                    $this->name,
-                    sprintf('<comment>Extension has a code coverage of "%d" for type "%s"</comment>', $codeCoverages[$codeCoverageType], $codeCoverageType)
-                );
-                Logger::notice(sprintf('<comment>Extension has a code coverage of "%d" for type "%s"</comment>', $codeCoverages[$codeCoverageType], $codeCoverageType));
-                $score = $this->settings->bad;
+        if (0 < count($this->modulePrefixes)) {
+            $modulePrefixString = implode(' ', $this->modulePrefixes);
+            $phpUnitCoverageFile = 'codecoverage.xml';
+            $params = '--coverage-clover ' . $phpUnitCoverageFile .' --filter ' . $modulePrefixString;
+            if (0 < count($paramsArray)) {
+                $params .= ' ' . implode(' ', $paramsArray);
             }
-        }
-        // compare phpunit test results with pdepend
-        $phpUnitXpath = "//class[starts-with(@name, '" . $modulePrefixString . "')]";
-        $phpUnitClasses = $this->getClasses($phpUnitCoverageFile, $phpUnitXpath);
-        $pdependClasses = $this->getClasses($pdependSummaryFile, "//class[starts-with(@name, '" . $modulePrefixString . "')  and not(starts-with(@name, '" . $modulePrefixString . '_Test' . "'))]");
-        $notCoveredClasses = array_diff($pdependClasses, $phpUnitClasses);
+            $execString = $executable . ' ' . $params . ' ' .  $this->config->common->magento->target . DIRECTORY_SEPARATOR . 'UnitTests.php';
+            exec($execString, $phpUnitOutput);
+            $pdependSummaryFile = 'summary.xml';
+            $execString = sprintf('vendor/pdepend/pdepend/src/bin/pdepend --summary-xml="%s" "%s"', $pdependSummaryFile, $extensionPath);
+            exec($execString);
+            $phpUnitXpath = "//class[starts-with(@name, '" . $modulePrefixString . "')]/../metrics";
+            $codeCoverages = $this->evaluateCodeCoverage($phpUnitCoverageFile, $phpUnitXpath);
+            $codeCoverageSettings = $this->settings->phpUnitCodeCoverages->toArray();
+            foreach (array_keys($codeCoverageSettings) as $codeCoverageType) {
+                if (array_key_exists($codeCoverageType, $codeCoverages)) {
+                    Logger::addComment(
+                        $extensionPath,
+                        $this->name,
+                        sprintf('<comment>Extension has a code coverage of "%f" for type "%s"</comment>', $codeCoverages[$codeCoverageType], $codeCoverageType)
+                    );
+                    Logger::notice(sprintf('<comment>Extension has a code coverage of "%f" for type "%s"</comment>', $codeCoverages[$codeCoverageType], $codeCoverageType));
+                    if ($codeCoverages[$codeCoverageType] < $codeCoverageSettings[$codeCoverageType]) {
+                        $score = $this->settings->bad;
+                    }
+                }
+            }
+            // compare phpunit test results with pdepend
+            $phpUnitXpath = "//class[starts-with(@name, '" . $modulePrefixString . "')]";
+            $phpUnitClasses = $this->getClasses($phpUnitCoverageFile, $phpUnitXpath);
+            $pdependClasses = $this->getClasses($pdependSummaryFile, "//class[starts-with(@name, '" . $modulePrefixString . "')  and not(starts-with(@name, '" . $modulePrefixString . '_Test' . "'))]");
+            $notCoveredClasses = array_diff($pdependClasses, $phpUnitClasses);
 
-        if (0 < sizeof($notCoveredClasses)) {
-            if ($this->settings->allowedNotCoveredClasses < sizeof($notCoveredClasses)) {
-                $score = $this->settings->bad;
-            }
-            foreach ($notCoveredClasses as $notCoveredClass) {
+            if (0 < sizeof($notCoveredClasses)) {
+                if ($this->settings->allowedNotCoveredClasses < sizeof($notCoveredClasses)) {
+                    $score = $this->settings->bad;
+                }
+                foreach ($notCoveredClasses as $notCoveredClass) {
 
-                Logger::notice(
-                    '<comment>Following class is not covered by any test: ' . $notCoveredClass . ' </comment>'
-                );
+                    Logger::notice(
+                        '<comment>Following class is not covered by any test: ' . $notCoveredClass . ' </comment>'
+                    );
+                }
             }
+            unlink($pdependSummaryFile);
+            unlink($phpUnitCoverageFile);
+        } else {
+            $score = $this->settings->bad;
         }
         return $score;
     }
