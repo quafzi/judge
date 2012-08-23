@@ -29,36 +29,41 @@ class CodeRuin implements JudgePlugin
         $this->extensionPath = $extensionPath;
         $settings = $this->config->plugins->{$this->name};
         $score = $settings->good;
-        $foundTokens = array();
-        foreach ($settings->criticals as $token) {
+
+        $score += ($this->extensionContainsTokens($extensionPath, $settings->criticals))
+            ? $settings->critical->bad
+            : $settings->critical->good;
+
+        $score += ($this->extensionContainsTokens($extensionPath, $settings->warnings))
+            ? $settings->warning->bad
+            : $settings->warning->good;
+
+        if ($settings->good === $score) {
+            Logger::success('No unfinished code found at ' . $extensionPath);
+        }
+
+        Logger::setScore($extensionPath, $this->name, $score);
+        return $score;
+    }
+
+    protected function extensionContainsTokens($extensionPath, $tokens)
+    {
+        $found = 0;
+        foreach ($tokens as $token) {
             $filesWithThatToken = array();
             $command = 'grep -riEl "' . $token . '" ' . $extensionPath . '/app';
             exec($command, $filesWithThatToken, $return);
-            if (0 < count($filesWithThatToken)) {
-                $score = $settings->bad;
+            $count = count($filesWithThatToken);
+            if (0 < $count) {
                 Logger::addComment($extensionPath, $this->name, sprintf(
                     'Found an indicator of unfinished code: "%s" at %s',
                     $token,
-                    implode(';', $filesWithThatToken)
+                    implode(', ', $filesWithThatToken)
                 ));
-                $foundTokens[$token] = $filesWithThatToken;
+                $found += $count;
             }
-            Logger::setResultValue($extensionPath, $this->name, $token, count($filesWithThatToken));
         }
-        if (0 < count($foundTokens)) {
-            foreach ($foundTokens as $token=>$files) {
-                Logger::warning(sprintf(
-                    'Found %d unfinished code part' . (1 < count($foundTokens[$token]) ? 's' : '') . ' marked with "%s" at %s',
-                    count($foundTokens[$token]),
-                    $token,
-                    $extensionPath
-                ));
-            }
-        } else {
-            Logger::success('No unfinished code found at ' . $extensionPath);
-        }
-        Logger::setScore($extensionPath, $this->name, $score);
-        return $score;
+        return (0 < $found);
     }
 }
 
