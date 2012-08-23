@@ -426,12 +426,15 @@ class Extension extends Config
             if (0 == count($additionalProperties)) {
                 return false;
             }
+            $tableName = null;
             foreach ($additionalProperties as $table=>$fields) {
                 if (false == in_array($fieldName, $fields)) {
                     continue;
                 }
+                $tableName = $table;
+                break;
             }
-            if ($this->getTableForClass($className) === $table) {
+            if (false == is_null($tableName) && $this->getTableForClass($className) === $tableName) {
                 return true;
             }
         }
