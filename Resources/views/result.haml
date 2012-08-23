@@ -1,0 +1,88 @@
+!!!
+%html{ :xmlns => "http://www.w3.org/1999/xhtml", :lang => "en", "xml:lang" => "en"}
+  %head
+    %title Judge Result
+    %meta{"http-equiv" => "Content-Type", :content => "text/html; charset=utf-8"}
+    :css
+        body {
+          height:100%;
+          font-size:11px;
+          margin-left:5%;
+          margin-right:5%;
+          background-color: #eefeef;
+          color:black;
+        }
+        .passed {
+          background: none repeat scroll 0 0 #EEFFEE;
+          border: 2px solid #22FF22;
+          margin-bottom: 2px;
+        }
+        .failed {
+          background: none repeat scroll 0 0 #FFFEDD;
+          border: 2px solid #FF3322;
+          margin: 0 0 30px;
+        }
+        .comments {
+          display: none;
+          margin-top: 30px;
+          padding: 5px;
+        }
+        .comments .success {
+          color: #22FF22;
+          font-weight: bold;
+        }
+        .comments .warning {
+          color: #DD7700;
+          font-weight: bold;
+        }
+        .comments .error {
+          color: #FF0000;
+          font-weight: bold;
+        }
+        .check:hover .comments {
+          display:block
+        }
+        .title {
+          margin: 0 0 0 25px;
+          padding: 3px;
+        }
+        .passed .title {
+          background: #22FF22;
+        }
+        .failed .title {
+          background: #FF3322;
+        }
+        .score {
+          font-style:  italic;
+          font-weight: bold;
+          margin-left: 0;
+          margin-top:  -22px;
+          padding:     3px;
+          position:    absolute;
+          text-align:  right;
+          width:       20px;
+        }
+  %body
+    #header
+      %h1 Judge
+      %h2= $extension . ' got score ' . $score
+    #content
+      - foreach ($passedChecks as $check=>$passed)
+        .check
+          .passed
+            %h3.title= $check
+            %div.score= $passed['score']
+            %div.comments
+              - foreach ($passed['comments'] as $comment)
+                %div.comment= $comment
+      - foreach ($failedChecks as $check=>$failed)
+        .check
+          .failed
+            %h3.title= $check
+            %div.score= $failed['score']
+            %div.comments
+              - foreach ($failed['comments'] as $comment)
+                %div.comment= $comment
+    #footer
+      %p
+        Powered by Judge
