@@ -423,6 +423,9 @@ class Extension extends Config
                 return false;
             }
             $additionalProperties = $changes['add'];
+            if (0 == count($additionalProperties)) {
+                return false;
+            }
             foreach ($additionalProperties as $table=>$fields) {
                 if (false == in_array($fieldName, $fields)) {
                     continue;
