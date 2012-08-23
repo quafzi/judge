@@ -16,7 +16,8 @@
         "dg/dibi":                   "dev-master",
         "netresearch/jumpstorm":     "dev-master",
         "symfony/console":           "2.0.x-dev",
-        "symfony/class-loader":      "2.0.x-dev"
+        "symfony/class-loader":      "2.0.x-dev",
+        "mthaml/mthaml":             "dev-master"
     },
     "authors": [
         {

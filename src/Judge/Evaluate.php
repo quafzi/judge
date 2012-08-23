@@ -12,6 +12,11 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Output\Output;
 
+require_once __DIR__ . '/../../vendor/mthaml/mthaml/lib/MtHaml/Autoloader.php';
+
+use MtHaml\Environment as HamlGenerator;
+use MtHaml\Autoloader as HamlLoader;
+
 use \Exception as Exception;
 
 /**
@@ -90,6 +95,7 @@ class Evaluate extends Command
                 $plugin->execute($extensionPath);
             }
             Logger::printResults($extensionPath);
+            $this->generateResultHtml($extensionPath);
         }
     }
     
@@ -156,5 +162,53 @@ class Evaluate extends Command
     {
         require_once($this->config->getTarget() . DIRECTORY_SEPARATOR . 'app' . DIRECTORY_SEPARATOR . 'Mage.php');
         \Mage::app();
+    }
+
+    protected function generateResultHtml($extension)
+    {
+        HamlLoader::register();
+        $haml = new HamlGenerator('php', array('enable_escaper' => false));
+        $template   = 'Resources/views/result.haml';
+        $targetFile = 'tmp/result.php';
+        $compiled   = $haml->compileString(file_get_contents($template), $template);
+        file_put_contents($targetFile, $compiled);
+
+        $results = $this->convertResultCommentsToHtml(
+            Logger::getResultArray($extension)
+        );
+        $passedChecks = $results['passedChecks'];
+        $failedChecks = $results['failedChecks'];
+        $score        = $results['score'];
+
+
+        ob_start();
+        include($targetFile);
+        $result = ob_get_contents();
+        ob_end_clean();
+        $targetHtml = 'tmp/result.html';
+        file_put_contents($targetHtml, $result);
+    }
+
+    protected function convertResultCommentsToHtml($results) {
+        foreach ($results as $type=>$checks) {
+            if (is_array($checks)) {
+                foreach ($checks as $check=>$checkResult) {
+                    foreach ($checkResult['comments'] as $key=>$comment) {
+                        $results[$type][$check]['comments'][$key] = strtr(
+                            $comment,
+                            array(
+                                '<comment>'  => '<span class="warning">',
+                                '</comment>' => '</span>',
+                                '<info>'     => '<span class="success">',
+                                '</info>'    => '</span>',
+                                '<error>'    => '<span class="error">',
+                                '</error>'   => '</span>',
+                            )
+                        );
+                    }
+                }
+            }
+        }
+        return $results;
     }
 }

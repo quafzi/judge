@@ -227,6 +227,39 @@ class Logger
     }
 
     /**
+     * get result array
+     */
+    public static function getResultArray($extension)
+    {
+        $passedChecks = array();
+        foreach (self::getPassedChecks($extension) as $check) {
+            $passedChecks[$check] = array(
+                'score'    => self::$results[$extension][$check]['result'],
+                'comments' => array()
+            );
+            if (array_key_exists('comments', self::$results[$extension][$check])) {
+                $passedChecks[$check]['comments'] = self::$results[$extension][$check]['comments'];
+            }
+        }
+        $failedChecks = array();
+        foreach (self::getFailedChecks($extension) as $check) {
+            $failedChecks[$check] = array(
+                'score'    => self::$results[$extension][$check]['result'],
+                'comments' => array()
+            );
+            if (array_key_exists('comments', self::$results[$extension][$check])) {
+                $failedChecks[$check]['comments'] = self::$results[$extension][$check]['comments'];
+            }
+        }
+
+        return array(
+            'passedChecks' => $passedChecks,
+            'failedChecks' => $failedChecks,
+            'score'        => self::getScore($extension)
+        );
+    }
+
+    /**
      * get results array
      *
      * @param string $extension 
