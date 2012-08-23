@@ -135,7 +135,13 @@ class MageCompatibility implements JudgePlugin
             . '* Extension seems to support following Magento versions: ' . implode(', ', $compatibleVersions)
         );
 
-        Logger::setScore($extensionPath, current(explode('\\', __CLASS__)), $this->settings->bad);
+        if ($this->containsNoLatestVersion(array_keys($incompatibleVersions), 'CE')) {
+            Logger::success(sprintf('Extension supports Magento at least from version %s', $this->settings->min->ce));
+            Logger::setScore($extensionPath, current(explode('\\', __CLASS__)), $this->settings->good);
+        } else {
+            Logger::setScore($extensionPath, current(explode('\\', __CLASS__)), $this->settings->bad);
+        }
+
         return $this->settings->bad;
     }
 
@@ -187,5 +193,19 @@ class MageCompatibility implements JudgePlugin
             ));
          */
         }
+    }
+
+    protected function containsNoLatestVersion($incompatibleVersions, $edition)
+    {
+        /* for now we assume, all versions start with "1." */
+        $min = (int) str_replace('.', '', $this->settings->min->ce);
+        foreach ($incompatibleVersions as $currentVersion) {
+            $current = (int) str_replace('.', '', $currentVersion);
+            if ($min < $current) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }
