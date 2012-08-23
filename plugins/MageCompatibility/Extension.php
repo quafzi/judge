@@ -26,7 +26,6 @@ class Extension extends Config
 
     public function getUsedMagentoMethods()
     {
-        require 'vendor/nikic/php-parser/lib/bootstrap.php';
         $this->usedMethods = new Methods();
         $this->addMethods($this->extensionPath);
         return $this->usedMethods;

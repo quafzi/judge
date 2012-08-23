@@ -13,6 +13,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Output\Output;
 
 require_once __DIR__ . '/../../vendor/mthaml/mthaml/lib/MtHaml/Autoloader.php';
+require 'vendor/nikic/php-parser/lib/bootstrap.php';
 
 use MtHaml\Environment as HamlGenerator;
 use MtHaml\Autoloader as HamlLoader;

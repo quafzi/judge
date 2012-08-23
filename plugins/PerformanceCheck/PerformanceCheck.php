@@ -30,7 +30,6 @@ class PerformanceCheck implements JudgePlugin
      */
     public function execute($extensionPath)
     {
-        require 'vendor/nikic/php-parser/lib/bootstrap.php';
         $this->extensionPath = $extensionPath;
         $settings = $this->config->plugins->{$this->name};
         $score = $settings->good;
