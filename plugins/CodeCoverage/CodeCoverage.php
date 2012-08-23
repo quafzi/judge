@@ -232,7 +232,6 @@ class CodeCoverage implements JudgePlugin
             $executable = 'vendor/netresearch/jumpstorm/jumpstorm';
             exec(sprintf('%s %s', $executable, $installMagentoCommand), $output);
             exec(sprintf('%s %s', $executable, $installUnitTestingCommand), $output);
-            echo sprintf('%s %s', $executable, $installExtensionCommand);
             exec(sprintf('%s %s', $executable, $installExtensionCommand), $output);
             Logger::notice(implode(PHP_EOL, $output));
         }

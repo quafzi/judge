@@ -37,14 +37,15 @@ class PerformanceCheck implements JudgePlugin
         $possiblePerformanceKillers = $this->scanForPerformanceLeaks($extensionPath);
 
         if (0 < sizeof($possiblePerformanceKillers)) {
-            $score = $this->settings->bad;
             foreach ($possiblePerformanceKillers as $possiblePerformanceKiller) {
                Logger::addComment($extensionPath, $this->name, '<comment>Found an indicator of a performance leak</comment>: ' . $possiblePerformanceKiller);
                Logger::notice($possiblePerformanceKiller);
                Logger::setResultValue($extensionPath, $this->name, $possiblePerformanceKiller, count($possiblePerformanceKillers));
             }
         }
-
+        if ($this->settings->allowedPerformanceIssues < sizeof($possiblePerformanceKillers)) {
+            $score = $this->settings->bad;
+        }
         if ($score == $this->settings->good) {
             Logger::success('No potential performance issues found ' . $extensionPath);
         }

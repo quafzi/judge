@@ -47,11 +47,11 @@ class CheckStyle implements JudgePlugin
         if ($this->settings->allowedIssues < sizeof($csResults)) {
             $score = $this->settings->bad;
             foreach ($csResults as $issue) {
-                Logger::addComment(
-                    $extensionPath,
-                    $this->name,
-                    '<comment>PHPCS found issue:</comment>' . $issue
-                );
+//                Logger::addComment(
+//                    $extensionPath,
+//                    $this->name,
+//                    '<comment>PHPCS found issue:</comment>' . $issue
+//                );
                 $this->addToUniqueIssues($issue);
             }
             $this->logUniqueIssues();

@@ -33,7 +33,7 @@ class CheckComments implements JudgePlugin
         $lowerBoundary = $this->settings->lowerBoundary;
         $upperBoundary = $this->settings->upperBoundary;
         $clocToNclocRatio = $this->getClocToNclocRatio($extensionPath);
-        Logger::addComment($extensionPath, $this->name, '<comment>calculated cloc to ncloc ratio of</comment>' . $clocToNclocRatio);
+        Logger::addComment($extensionPath, $this->name, '<comment>calculated cloc to ncloc ratio of</comment> ' . $clocToNclocRatio);
         if ($clocToNclocRatio <= $lowerBoundary || $clocToNclocRatio >= $upperBoundary) {
             $score = $this->settings->bad;
         }
