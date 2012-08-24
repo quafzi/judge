@@ -223,19 +223,28 @@ class CodeCoverage implements JudgePlugin
 
     protected function setUpEnv($extensionPath)
     {
+        $executable = 'vendor/netresearch/jumpstorm/jumpstorm';
+
         if ($this->settings->useJumpstorm == true) {
             $iniFile = $this->generateJumpstormConfig($extensionPath);
-            Logger::notice('Setting Up Magento environment via jumpström');
             $installMagentoCommand      = 'magento -c ' . $iniFile;
             $installUnitTestingCommand  = 'unittesting -c ' . $iniFile;
             $installExtensionCommand    = 'extensions -c ' . $iniFile;
-            $executable = 'vendor/netresearch/jumpstorm/jumpstorm';
+            Logger::notice('Setting Up Magento environment via jumpström');
             exec(sprintf('%s %s', $executable, $installMagentoCommand), $output);
             exec(sprintf('%s %s', $executable, $installUnitTestingCommand), $output);
             exec(sprintf('%s %s', $executable, $installExtensionCommand), $output);
             Logger::notice(implode(PHP_EOL, $output));
         }
+        if (!is_file($this->config->common->magento->target . DIRECTORY_SEPARATOR . 'UnitTests.php')) {
+            $iniFile = $this->generateJumpstormConfig($extensionPath);
+            Logger::notice('Installing Unit Testing environment via jumpström');
+            $installUnitTestingCommand  = 'unittesting -c ' . $iniFile;
+            exec(sprintf('%s %s', $executable, $installUnitTestingCommand), $output);
+        }
     }
+
+
 
     /**
      * @throws Zend_Config_Exception if config could not be written
