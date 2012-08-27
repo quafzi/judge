@@ -80,6 +80,10 @@ class Extension extends Config
     protected function isUnitTestFile($filePath)
     {
         $filePath = str_replace($this->extensionPath, '', $filePath);
+        if ($filePath == '/app/code/community/Netresearch/Buergel/Test/Model/ConfigTest.php') {
+            var_dump(preg_match('~app/code/.*/.*/Test/~u', $filePath));
+            die();
+        }
         return (0 < preg_match('~app/code/.*/.*/Test/~u', $filePath));
     }
 
@@ -91,6 +95,7 @@ class Extension extends Config
                 $this->addMethods($item);
             }
             if (is_file($item) && is_readable($item)) {
+
                 if ($this->isUnitTestFile($item)) {
                     continue;
                 }
@@ -228,7 +233,7 @@ class Extension extends Config
      * get last assignment to that variable
      *
      * @param SimpleXMLElement $method
-     * @param string           $variableName 
+     * @param string           $variableName
      * @return array(line => type) || NULL
      */
     protected function getLastAssignment(\SimpleXMLElement $method, $variableName, $usedInLine)

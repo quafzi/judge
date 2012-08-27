@@ -98,4 +98,28 @@ class Setup
 
         return explode(';', $rawQueries);
     }
+
+
+    /**
+     * pseudo override
+     */
+    public function addAttribute()
+    {
+
+    }
+
+    /**
+     * pseudo override
+     */
+    public function getAttribute()
+    {
+
+    }
+    /**
+     * pseudo override
+     */
+    public function updateAttribute()
+    {
+
+    }
 }
