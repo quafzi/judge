@@ -55,19 +55,22 @@ class CodeCoverage implements JudgePlugin
             $paramsArray = $this->settings->PHPUnitParams->toArray();
         }
         if (0 < count($this->modulePrefixes)) {
-            $modulePrefixString = implode(' ', $this->modulePrefixes);
+            $modulePrefixString = '"' . implode('|', $this->modulePrefixes) . '"';
             $phpUnitCoverageFile = 'codecoverage.xml';
             $params = '--coverage-clover ' . $phpUnitCoverageFile .' --filter ' . $modulePrefixString;
             if (0 < count($paramsArray)) {
-                $params .= ' ' . implode(' ', $paramsArray);
+                $params .= implode(' ', $paramsArray);
             }
             $execString = $executable . ' ' . $params . ' ' .  $this->config->common->magento->target . DIRECTORY_SEPARATOR . 'UnitTests.php';
             exec($execString, $phpUnitOutput);
             $pdependSummaryFile = 'summary.xml';
             $execString = sprintf('vendor/pdepend/pdepend/src/bin/pdepend --summary-xml="%s" "%s"', $pdependSummaryFile, $extensionPath);
             exec($execString);
-            $phpUnitXpath = "//class[starts-with(@name, '" . $modulePrefixString . "')]/../metrics";
-            $codeCoverages = $this->evaluateCodeCoverage($phpUnitCoverageFile, $phpUnitXpath);
+            $phpUnitXpaths = array();
+            foreach ($this->modulePrefixes as $modulePrefixString) {
+                $phpUnitXpaths[] = "//class[starts-with(@name, '" . $modulePrefixString . "')]/../metrics";
+            }
+            $codeCoverages = $this->evaluateCodeCoverage($phpUnitCoverageFile, $phpUnitXpaths);
             $codeCoverageSettings = $this->settings->phpUnitCodeCoverages->toArray();
             foreach (array_keys($codeCoverageSettings) as $codeCoverageType) {
                 if (array_key_exists($codeCoverageType, $codeCoverages)) {
@@ -83,9 +86,14 @@ class CodeCoverage implements JudgePlugin
                 }
             }
             // compare phpunit test results with pdepend
-            $phpUnitXpath = "//class[starts-with(@name, '" . $modulePrefixString . "')]";
-            $phpUnitClasses = $this->getClasses($phpUnitCoverageFile, $phpUnitXpath);
-            $pdependClasses = $this->getClasses($pdependSummaryFile, "//class[starts-with(@name, '" . $modulePrefixString . "')  and not(starts-with(@name, '" . $modulePrefixString . '_Test' . "'))]");
+            $phpUnitXpaths = array();
+            $pdependXpaths = array();
+            foreach ($this->modulePrefixes as $modulePrefixString) {
+                $phpUnitXpaths[] = "//class[starts-with(@name, '" . $modulePrefixString . "')]";
+                $pdependXpaths[] = "//class[starts-with(@name, '" . $modulePrefixString . "')  and not(starts-with(@name, '" . $modulePrefixString . '_Test' . "'))]";
+            }
+            $phpUnitClasses = $this->getClasses($phpUnitCoverageFile, $phpUnitXpaths);
+            $pdependClasses = $this->getClasses($pdependSummaryFile, $pdependXpaths);
             $notCoveredClasses = array_diff($pdependClasses, $phpUnitClasses);
 
             if (0 < sizeof($notCoveredClasses)) {
@@ -114,15 +122,17 @@ class CodeCoverage implements JudgePlugin
      * @param string $xpathExpression - the xpath for retrieving the class names
      * @return type
      */
-    protected function getClasses($pathToXmlFile, $xpathExpression)
+    protected function getClasses($pathToXmlFile, $xpathExpressions)
     {
         $classes = array();
-        $classNodes = $this->getNodes($pathToXmlFile, $xpathExpression);
-        if (!is_null($classNodes)) {
-            foreach ($classNodes as $classNode) {
-                // collect class names for determinig those which weren't covered by a test
-                if (!in_array($classNode['name'], $classes)) {
-                    $classes[] = current($classNode[0]['name']);
+        foreach ($xpathExpressions as $xpathExpression) {
+            $classNodes = $this->getNodes($pathToXmlFile, $xpathExpression);
+            if (!is_null($classNodes)) {
+                foreach ($classNodes as $classNode) {
+                    // collect class names for determinig those which weren't covered by a test
+                    if (!in_array($classNode['name'], $classes)) {
+                        $classes[] = current($classNode[0]['name']);
+                    }
                 }
             }
         }
@@ -138,7 +148,7 @@ class CodeCoverage implements JudgePlugin
      * @param string $xpathExpression - the xpath for retrievibng the results for the classes
      * @return array - the array containing the code coverage results
      */
-    protected function evaluateCodeCoverage($pathToXmlReport, $xpathExpression)
+    protected function evaluateCodeCoverage($pathToXmlReport, $xpathExpressions)
     {
         $valuesForClasses = array(
             'coveredmethods'        => 0,
@@ -156,18 +166,20 @@ class CodeCoverage implements JudgePlugin
             'conditionalsCoverage'  => 0,
             'elementsCoverage'      => 0
         );
-        $classNodes = $this->getNodes($pathToXmlReport, $xpathExpression);
-        if (!is_null($classNodes)) {
-            foreach ($classNodes as $classNode) {
-                foreach (array_keys($valuesForClasses) as $key) {
-                    $valuesForClasses[$key] += $this->getValueForNodeAttr($classNode, $key);
+        foreach ($xpathExpressions as $xpathExpression) {
+            $classNodes = $this->getNodes($pathToXmlReport, $xpathExpression);
+            if (!is_null($classNodes)) {
+                foreach ($classNodes as $classNode) {
+                    foreach (array_keys($valuesForClasses) as $key) {
+                        $valuesForClasses[$key] += $this->getValueForNodeAttr($classNode, $key);
+                    }
                 }
             }
+            $codeCoverage['methodCoverage']         += $this->getCoverageRatio($valuesForClasses['coveredmethods'], $valuesForClasses['methods']);
+            $codeCoverage['statementCoverage']      += $this->getCoverageRatio($valuesForClasses['coveredstatements'], $valuesForClasses['statements']);
+            $codeCoverage['conditionalsCoverage']   += $this->getCoverageRatio($valuesForClasses['coveredconditionals'], $valuesForClasses['conditionals']);
+            $codeCoverage['elementsCoverage']       += $this->getCoverageRatio($valuesForClasses['coveredelements'], $valuesForClasses['elements']);
         }
-        $codeCoverage['methodCoverage']         = $this->getCoverageRatio($valuesForClasses['coveredmethods'], $valuesForClasses['methods']);
-        $codeCoverage['statementCoverage']      = $this->getCoverageRatio($valuesForClasses['coveredstatements'], $valuesForClasses['statements']);
-        $codeCoverage['conditionalsCoverage']   = $this->getCoverageRatio($valuesForClasses['coveredconditionals'], $valuesForClasses['conditionals']);
-        $codeCoverage['elementsCoverage']       = $this->getCoverageRatio($valuesForClasses['coveredelements'], $valuesForClasses['elements']);
         return $codeCoverage;
     }
 

@@ -80,11 +80,7 @@ class Extension extends Config
     protected function isUnitTestFile($filePath)
     {
         $filePath = str_replace($this->extensionPath, '', $filePath);
-        if ($filePath == '/app/code/community/Netresearch/Buergel/Test/Model/ConfigTest.php') {
-            var_dump(preg_match('~app/code/.*/.*/Test/~u', $filePath));
-            die();
-        }
-        return (0 < preg_match('~app/code/.*/.*/Test/~u', $filePath));
+        return (0 < preg_match('~app/code/.*/.*/Test/~u', $filePath) || 0 < preg_match('~tests~u', $filePath));
     }
 
     protected function addMethods($path)
@@ -113,12 +109,16 @@ class Extension extends Config
                     //echo $item . PHP_EOL;
                     $serializer = new \PHPParser_Serializer_XML;
                     $xml = $serializer->serialize($stmts);
-
-                    //file_put_contents($item . '.stmts.xml', var_export($xml, true));
-                    $numberOfMethodCalls = $this->collectMethodCalls(
-                        $stmts,
-                        simplexml_load_string($xml)
-                    );
+                    if (simplexml_load_string($xml) === false) {
+                        continue;
+                    }
+                    else {
+    //                    file_put_contents($item . '.stmts.xml', var_export($xml, true));
+                        $numberOfMethodCalls = $this->collectMethodCalls(
+                            $stmts,
+                            simplexml_load_string($xml)
+                        );
+                    }
                     //echo PHP_EOL;
                 } catch (\PHPParser_Error $e) {
                     // no valid php

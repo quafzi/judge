@@ -11,7 +11,7 @@ class Setup
 
     public function __construct($file)
     {
-        include $file;
+//        include $file;
     }
 
     public function startSetup()

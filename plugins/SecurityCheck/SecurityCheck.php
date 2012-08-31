@@ -33,13 +33,13 @@ class SecurityCheck implements JudgePlugin
         $this->extensionPath = $extensionPath;
         $settings = $this->config->plugins->{$this->name};
         $score = $settings->good;
-        if ($settings->allowedRequestParams <= $this->checkForRequestParams($extensionPath)) {
+        if ($settings->allowedRequestParams < $this->checkForRequestParams($extensionPath)) {
             $score = $settings->bad;
         }
-        if ($settings->allowedMissingEscaping <= $this->checkForEscaping($extensionPath)) {
+        if ($settings->allowedMissingEscaping < $this->checkForEscaping($extensionPath)) {
             $score = $settings->bad;
         }
-        if ($settings->allowedSQLQueries <= $this->checkForSQLQueries($extensionPath)) {
+        if ($settings->allowedSQLQueries < $this->checkForSQLQueries($extensionPath)) {
             $score = $settings->bad;
         }
         if ($score == $settings->good) {

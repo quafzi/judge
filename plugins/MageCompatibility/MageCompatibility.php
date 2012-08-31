@@ -139,9 +139,16 @@ class MageCompatibility implements JudgePlugin
             'Checked Magento versions: ' . implode(', ', $availableVersions) . "\n"
             . '* Extension seems to support following Magento versions: ' . implode(', ', $compatibleVersions)
         );
-
+        foreach (array_keys($incompatibleVersions) as $key) {
+            if (0 == count($incompatibleVersions[$key]['classes']) &&
+                0 == count($incompatibleVersions[$key]['methods']) &&
+                0 == count($incompatibleVersions[$key]['constants'])
+                ) {
+                unset($incompatibleVersions[$key]);
+            }
+        }
         if ($this->containsNoLatestVersion(array_keys($incompatibleVersions), 'CE')) {
-            Logger::success(sprintf('Extension supports Magento at least from version %s', $this->settings->min->ce));
+            Logger::success(sprintf('Extension supports Magento at least from ce version %s and ee-version %s', $this->settings->min->ce, $this->settings->min->ee));
             Logger::setScore($extensionPath, current(explode('\\', __CLASS__)), $this->settings->good);
             return $this->settings->good;
         }
@@ -202,8 +209,13 @@ class MageCompatibility implements JudgePlugin
     protected function containsNoLatestVersion($incompatibleVersions, $edition)
     {
         /* for now we assume, all versions start with "1." */
-        $min = (int) str_replace('.', '', $this->settings->min->ce);
+        $minCE = (int) str_replace('.', '', $this->settings->min->ce);
+        $minEE = (int) str_replace('.', '', $this->settings->min->ee);
         foreach ($incompatibleVersions as $currentVersion) {
+            $min = $minCE;
+            if (strtolower(trim(substr($currentVersion, 0,2))) == 'ee') {
+                $min = $minEE;
+            }
             $current = (int) str_replace('.', '', substr($currentVersion, 3));
             if ($min < $current) {
                 return false;
