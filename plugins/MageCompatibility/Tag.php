@@ -58,7 +58,7 @@ class Tag
         }
         if (false == is_array($signatureIds) || 0 == count($signatureIds)) {
             Logger::warning('Could not find any matching definition of ' . $this->name);
-            return array();
+            return null;
         }
 
         /* fetch Magento versions */
