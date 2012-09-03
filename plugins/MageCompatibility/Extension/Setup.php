@@ -1,17 +1,26 @@
 <?php
 namespace MageCompatibility\Extension;
 
+use MageCompatibility\Extension\Mage as Mage;
+use Netresearch\Logger;
+
 class Setup
 {
     protected $changes=array(
         'add' => array()
     );
 
-    protected $connection;
+    protected $_conn;
 
     public function __construct($file)
     {
-//        include $file;
+        if (is_null($this->_conn)) {
+            $this->_conn = new Setup\Connection();
+        }
+        eval(
+            'namespace ' . __NAMESPACE__ . ';' .
+            '?>' . file_get_contents($file)
+        );
     }
 
     public function startSetup()
@@ -45,10 +54,7 @@ class Setup
 
     public function getConnection()
     {
-        if (is_null($this->connection)) {
-            $this->connection = new Setup\Connection();
-        }
-        return $this->connection;
+        return $this->_conn;
     }
 
     protected function evaluateQueries($queryClob)
