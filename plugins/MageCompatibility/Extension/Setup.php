@@ -17,10 +17,25 @@ class Setup
         if (is_null($this->_conn)) {
             $this->_conn = new Setup\Connection();
         }
-        eval(
-            'namespace ' . __NAMESPACE__ . ';' .
-            '?>' . file_get_contents($file)
-        );
+        $code = $this->getNormalizedInstallerCode($file);
+        eval('namespace ' . __NAMESPACE__ . ';?>' . $code);
+    }
+
+    /**
+     * avoid usage of Magento core code in installer scripts, raise warning instead
+     *
+     * @param string $file Installer file name
+     * @return string
+     */
+    protected function getNormalizedInstallerCode($file)
+    {
+        $code = file_get_contents($file);
+        /* replace direct instanciation */
+        $code = preg_replace('/new [^(]+/', 'new Mage', $code);
+        /* replace constant usage */
+        $code = preg_replace('/[A-Za-z0-9_]+::[A-Za-z0-9_]+/', '0', $code);
+
+        return $code;
     }
 
     public function startSetup()
