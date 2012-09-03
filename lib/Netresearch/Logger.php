@@ -39,6 +39,11 @@ class Logger
         self::$verbosity = $verbosity;
     }
 
+    public static function getVerbosity()
+    {
+        return self::$verbosity;
+    }
+
     protected static function writeln($message, array $args = array(), $type = null)
     {
         if (self::VERBOSITY_NONE === self::$verbosity) {
@@ -208,7 +213,7 @@ class Logger
             }
         }
         foreach (self::getPassedChecks($extension) as $passedCheck) {
-            self::log('"%s" passed check "%s" with score %s', array($extension, $passedCheck, self::$results[$extension][$passedCheck]['result']));
+            self::log('<info>"%s" passed check "%s" with score %s</info>', array($extension, $passedCheck, self::$results[$extension][$passedCheck]['result']));
             if (array_key_exists('comments', self::$results[$extension][$passedCheck])) {
                 foreach (self::$results[$extension][$passedCheck]['comments'] as $comment) {
                     self::log('* ' . $comment);
