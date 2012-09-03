@@ -109,7 +109,7 @@ class Extension extends Config
                     //echo $item . PHP_EOL;
                     $serializer = new \PHPParser_Serializer_XML;
                     $xml = $serializer->serialize($stmts);
-                    if (simplexml_load_string($xml) === false) {
+                    if (@simplexml_load_string($xml) === false) {
                         continue;
                     }
                     else {
