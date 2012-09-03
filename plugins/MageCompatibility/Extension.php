@@ -472,7 +472,7 @@ class Extension extends Config
             $command = sprintf( 'grep -oriE " function ([a-zA-Z0-9_]*)" %s', $this->extensionPath . '/app/code/');
             exec($command, $output);
             foreach ($output as $line) {
-                if (false === strpos(':', $line)) {
+                if (false === strpos($line, ':')) {
                     continue;
                 }
                 list($path, $method) = explode(':', $line);
