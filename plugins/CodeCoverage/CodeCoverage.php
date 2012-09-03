@@ -239,14 +239,31 @@ class CodeCoverage implements JudgePlugin
 
         if ($this->settings->useJumpstorm == true) {
             $iniFile = $this->generateJumpstormConfig($extensionPath);
-            $installMagentoCommand      = 'magento -c ' . $iniFile;
-            $installUnitTestingCommand  = 'unittesting -c ' . $iniFile;
-            $installExtensionCommand    = 'extensions -c ' . $iniFile;
+            $params = '';
+            $exec = 'exec';
+            if (Logger::VERBOSITY_MAX == Logger::getVerbosity()) {
+                $params .= ' -v';
+            }
+            $command = sprintf('%s magento -c %s %s', $executable, $iniFile, $params)
+                . ' && ' . sprintf('%s unittesting -c %s %s', $executable, $iniFile, $params)
+                . ' && ' . sprintf('%s extensions -c %s %s', $executable, $iniFile, $params);
+
             Logger::notice('Setting Up Magento environment via jumpström');
-            exec(sprintf('%s %s', $executable, $installMagentoCommand), $output);
-            exec(sprintf('%s %s', $executable, $installUnitTestingCommand), $output);
-            exec(sprintf('%s %s', $executable, $installExtensionCommand), $output);
-            Logger::notice(implode(PHP_EOL, $output));
+            if (Logger::VERBOSITY_MAX == Logger::getVerbosity()) {
+                $error = passthru($command);
+            } else {
+                exec($command, $output, $error);
+                if ($error) {
+                    $origVerbosity = Logger::getVerbosity();
+                    Logger::setVerbosity(Logger::VERBOSITY_MAX);
+                    Logger::log(implode(PHP_EOL, $output));
+                    Logger::setVerbosity($origVerbosity);
+                }
+                Logger::addComment($extensionPath, $this->name, $output);
+            }
+            if ($error) {
+                Logger::error('Magento installation failed');
+            }
         }
         if (!is_file($this->config->common->magento->target . DIRECTORY_SEPARATOR . 'UnitTests.php')) {
             $iniFile = $this->generateJumpstormConfig($extensionPath);
