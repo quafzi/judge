@@ -109,7 +109,7 @@ class Extension extends Config
                     //echo $item . PHP_EOL;
                     $serializer = new \PHPParser_Serializer_XML;
                     $xml = $serializer->serialize($stmts);
-                    if (simplexml_load_string($xml) === false) {
+                    if (@simplexml_load_string($xml) === false) {
                         continue;
                     }
                     else {
@@ -472,6 +472,9 @@ class Extension extends Config
             $command = sprintf( 'grep -oriE " function ([a-zA-Z0-9_]*)" %s', $this->extensionPath . '/app/code/');
             exec($command, $output);
             foreach ($output as $line) {
+                if (false === strpos(':', $line)) {
+                    continue;
+                }
                 list($path, $method) = explode(':', $line);
                 $this->methods[trim(str_replace('function', '', $method))] = trim(substr_replace($this->extensionPath, '', $path));
             }
