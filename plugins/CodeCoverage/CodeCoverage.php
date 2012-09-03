@@ -29,9 +29,18 @@ class CodeCoverage implements JudgePlugin
     {
         $config = new \MageCompatibility\Extension\Config();
         $this->modulePrefixes = $config->getUnitTestPrefixes($extensionPath);
-        $this->setUpEnv($extensionPath);
         $score = $this->settings->good;
-        $score = $this->evaluateTestCoverage($extensionPath);
+        if (0 == count($this->modulePrefixes)) {
+            $score = $this->settings->bad;
+            Logger::addComment(
+                $extensionPath,
+                $this->name,
+                'No tests found for extension'
+            );
+        } else {
+            $this->setUpEnv($extensionPath);
+            $score = $this->evaluateTestCoverage($extensionPath);
+        }
         Logger::setScore($extensionPath, $this->name, $score);
         return $score;
     }
