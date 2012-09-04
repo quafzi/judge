@@ -126,15 +126,16 @@ class TagParser
      */
     protected function addClass($name, $path, $codeLine)
     {
-        $data = array('name' => $name);
+        $data = array('name' => $name, 'path' => $path);
         $classData = dibi::fetch('
             SELECT t.id as classId, COALESCE(s.id,0) as signatureId
             FROM [classes] t
                 LEFT JOIN [class_signature] ts ON ( t.id = ts.class_id )
                 LEFT JOIN [signatures] s ON ( ts.signature_id = s.id AND s.definition = %s)
-            WHERE name = %s ORDER BY signatureId DESC',
+            WHERE name = %s AND t.path = %s ORDER BY signatureId DESC',
             $codeLine,
-            $name
+            $name,
+            $path
         );
         if (false === $classData || 0 == $classData->signatureId) {
             $signatureId = $this->createSignature('c', $codeLine, $path);
@@ -144,7 +145,10 @@ class TagParser
             } else {
                 $classId = $classData->classId;
             }
-            dibi::query('INSERT INTO [class_signature] %v', array('class_id' => $classId, 'signature_id' => $signatureId));
+            dibi::query(
+                'INSERT INTO [class_signature] %v',
+                array('class_id' => $classId, 'signature_id' => $signatureId)
+            );
         } else {
             $signatureId = $classData->signatureId;
         }
