@@ -120,7 +120,7 @@ class Tagger
                 $functionDefinition = '/^' . str_replace("\r", '', $functionDefinition);
                 $functionDefinition = '/^' . str_replace("\t", '', $functionDefinition);
             }
-            if ($sourceLineNumber <= $currentLineNumber) {
+            if ($sourceLineNumber < $currentLineNumber) {
                 $bodyStartPos = strpos($line, '{');
                 if (false !== $bodyStartPos) {
                     $line = substr($line, 0, $bodyStartPos);

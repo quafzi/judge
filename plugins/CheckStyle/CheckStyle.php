@@ -37,7 +37,7 @@ class CheckStyle implements JudgePlugin
         $standardToUse  = $this->settings->standardToUse;
         $csResults      = array();
         $command = sprintf(
-            $executable . ' --standard="%s" "%s"',
+            $executable . ' --ignore=*/jquery* --standard="%s" "%s"',
             $standardToUse,
             $extensionPath
         );
