@@ -75,3 +75,11 @@ dibi::query(
         PRIMARY KEY (magento_id, signature_id))'
 );
 
+dibi::query(
+    'CREATE TABLE IF NOT EXISTS [flat_method_inheritance] (
+        [class_id] INTEGER NOT NULL REFERENCES [classes](id),
+        [signature_id] INTEGER NOT NULL REFERENCES [signatures](id),
+        [magento_id] INTEGER NOT NULL REFERENCES [magento](id),
+        PRIMARY KEY (class_id, magento_id, signature_id))'
+);
+

@@ -388,6 +388,10 @@ class TagParser
          * app/code/core/Foo/Bar/Some/Path.php
          */
         $irrelevantPathParts = array(
+            'lib/3Dsecure',
+            'lib/googlecheckout',
+            'lib/PEAR',
+            'lib/phpseclib',
             'lib/',
             'app/code/core/',
             'app/code/community/',
