@@ -268,7 +268,7 @@ class CodeCoverage implements JudgePlugin
                     Logger::log(implode(PHP_EOL, $output));
                     Logger::setVerbosity($origVerbosity);
                 }
-                Logger::addComment($extensionPath, $this->name, $output);
+                Logger::addComment($extensionPath, $this->name, implode(PHP_EOL, $output));
             }
             if ($error) {
                 Logger::error('Magento installation failed');
