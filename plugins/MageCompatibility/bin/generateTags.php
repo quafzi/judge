@@ -121,6 +121,7 @@ class Tagger
                 $functionDefinition = '/^' . str_replace("\t", '', $functionDefinition);
             }
             if ($sourceLineNumber < $currentLineNumber) {
+                $line = $this->cleanupComments($line);
                 $bodyStartPos = strpos($line, '{');
                 if (false !== $bodyStartPos) {
                     $line = substr($line, 0, $bodyStartPos);
@@ -135,5 +136,21 @@ class Tagger
         fclose($sourceFile);
 
         return $functionDefinition;
+    }
+
+    protected function cleanupComments($line)
+    {
+        // skip comment lines
+        if ('/*' == substr(trim($line), 0, 2)
+            || '//' == substr(trim($line), 0, 2)
+            || '*' == substr(trim($line), 0, 1)
+            || '#' == substr(trim($line), 0, 1)
+        ) {
+            return '';
+        }
+        $line = strstr($line, '#', $beforeNeedle=true);
+        $line = strstr($line, '//', $beforeNeedle=true);
+        $line = strstr($line, '/*', $beforeNeedle=true);
+        return trim($line);
     }
 }
