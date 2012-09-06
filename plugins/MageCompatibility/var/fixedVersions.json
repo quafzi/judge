@@ -1,0 +1,17 @@
+{
+    "methods": [
+        {
+            "name": "getOriginalData",
+            "classes": [
+                "Varien_Data_Form_Element_Abstract"
+            ],
+            "versions": [
+                "*"
+            ]
+        }
+    ],
+    "classes": [
+    ],
+    "constants": [
+    ]
+}
