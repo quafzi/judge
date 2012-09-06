@@ -69,12 +69,6 @@ class MageCompatibility implements JudgePlugin
             $supportedVersions = $method->getMagentoVersions();
             //echo $context['class'] . '->' . $method->getName() . ' ';
             if (false == is_array($supportedVersions)) {
-                /* method is not known for any Magento version, so it is either a database getter or part of the extension itself
-                $isExtensionMethod = $method->isExtensionMethod($method->getName(), $extensionPath);
-                if (true === $isExtensionMethod) {
-                    echo "possible extension method found: " . $context . '->' . $method->getName() . PHP_EOL;
-                }
-                */
                 continue;
             }
             $tagIncompatibleVersions = array_diff($availableVersions, $supportedVersions);
@@ -88,8 +82,6 @@ class MageCompatibility implements JudgePlugin
                 }
                 $incompatibleVersions[$version]['methods'][] = $methodName;
             }
-            //echo implode(', ', $supportedVersions);
-            //echo PHP_EOL;
         }
 
         $compatibleVersions = array();
@@ -146,7 +138,7 @@ class MageCompatibility implements JudgePlugin
             }
         }
         if ($this->containsNoLatestVersion(array_keys($incompatibleVersions), 'CE')) {
-            Logger::success(sprintf('Extension supports Magento at least from ce version %s and ee-version %s', $this->settings->min->ce, $this->settings->min->ee));
+            Logger::success(sprintf('Extension supports Magento at least from CE version %s and EE version %s', $this->settings->min->ce, $this->settings->min->ee));
             Logger::setScore($extensionPath, current(explode('\\', __CLASS__)), $this->settings->good);
             return $this->settings->good;
         }
