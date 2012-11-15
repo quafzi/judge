@@ -11,7 +11,7 @@
         "pdepend/pdepend":           "dev-master",
         "eher/phpunit":              "dev-master",
         "phpmd/phpmd":               "dev-master",
-        "zerkalica/PHP_Codesniffer": "dev-master",
+        "squizlabs/php_codesniffer": "dev-master",
         "nikic/php-parser":          "dev-master",
         "dg/dibi":                   "dev-master",
         "netresearch/jumpstorm":     "dev-master",
