@@ -4,6 +4,36 @@ Judge
 
 Judge is a tool to examine Magento extensions regarding their qualitiy and compatibility.
 
+Prerequsites
+============
+
+Judge requires some PEAR packages to be installed:
+
+* PHP_CompatInfo
+
+  ::
+
+    $ sudo pear channel-discover bartlett.laurent-laville.org
+    Adding Channel "bartlett.laurent-laville.org" succeeded
+    Discovery of channel "bartlett.laurent-laville.org" succeeded
+
+    $ sudo pear channel-discover components.ez.no
+    Adding Channel "components.ez.no" succeeded
+    Discovery of channel "components.ez.no" succeeded
+
+    $ sudo pear channel-discover pear.phpunit.de
+    Adding Channel "pear.phpunit.de" succeeded
+    Discovery of channel "pear.phpunit.de" succeeded
+
+    $ sudo pear install bartlett/PHP_CompatInfo
+
+* TheSeer/fDOMDocument
+
+  ::
+
+    $ sudo pear channel-discover pear.netpirates.net
+    $ sudo pear install TheSeer/fDOMDocument
+
 Installation
 ============
 
