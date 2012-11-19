@@ -27,19 +27,20 @@ class CodeRuin implements JudgePlugin
     public function execute($extensionPath)
     {
         $this->extensionPath = $extensionPath;
-        $settings = $this->config->plugins->{$this->name};
-        $score = $settings->good;
+        $score = 0;
 
-        $score += ($this->extensionContainsTokens($extensionPath, $settings->criticals))
-            ? $settings->critical->bad
-            : $settings->critical->good;
+        $score += ($this->extensionContainsTokens($extensionPath, $this->settings->criticals))
+            ? $this->settings->critical->bad
+            : $this->settings->critical->good;
 
-        $score += ($this->extensionContainsTokens($extensionPath, $settings->warnings))
-            ? $settings->warning->bad
-            : $settings->warning->good;
+        $score += ($this->extensionContainsTokens($extensionPath, $this->settings->warnings))
+            ? (int) $this->settings->warning->bad
+            : $this->settings->warning->good;
 
-        if ($settings->good === $score) {
+        if ($this->settings->good <= $score) {
             Logger::success('No unfinished code found at ' . $extensionPath);
+        } else {
+            Logger::warning('Unfinished code found at ' . $extensionPath);
         }
 
         Logger::setScore($extensionPath, $this->name, $score);
