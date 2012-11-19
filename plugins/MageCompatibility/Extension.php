@@ -311,6 +311,9 @@ class Extension extends Config
 
             $variable = current($call->xpath('./subNode:var | ./subNode:class'));
             $object = $this->getResultType($variable);
+            if (false == $object) {
+                continue;
+            }
 
             if ($this->isPhpMethod($object, $methodName)) {
                 continue;
