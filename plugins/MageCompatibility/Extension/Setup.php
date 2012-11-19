@@ -125,22 +125,23 @@ class Setup
      * pseudo override
      */
     public function addAttribute()
-    {
-
-    }
+    {}
 
     /**
      * pseudo override
      */
     public function getAttribute()
-    {
+    {}
 
-    }
     /**
      * pseudo override
      */
     public function updateAttribute()
-    {
+    {}
 
-    }
+    /**
+     * pseudo override
+     */
+    public function updateCustomerForms()
+    {}
 }
