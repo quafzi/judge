@@ -32,7 +32,7 @@ class CheckStyle implements JudgePlugin
     {
         $this->extensionPath = $extensionPath;
         $score          = 0;
-        $executable     = 'vendor/zerkalica/PHP_CodeSniffer/scripts/phpcs';
+        $executable     = 'vendor/squizlabs/php_codesniffer/scripts/phpcs';
         $score          = $this->settings->good;
         $standardToUse  = $this->settings->standardToUse;
         $csResults      = array();
