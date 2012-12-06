@@ -122,26 +122,32 @@ class Setup
 
 
     /**
-     * pseudo override
+     * pseudo override, should be handeled
+     * @todo
      */
     public function addAttribute()
     {}
 
     /**
-     * pseudo override
-     */
-    public function getAttribute()
-    {}
-
-    /**
-     * pseudo override
+     * pseudo override, should be handeled
+     * @todo
      */
     public function updateAttribute()
     {}
 
     /**
-     * pseudo override
+     * pseudo override, should be handeled
+     * @todo
      */
     public function updateCustomerForms()
     {}
+
+    /**
+     * pseudo override
+     */
+    public function __call($method, $args)
+    {
+        Logger::warning("Called Magento Setup method \"$method\" in installer script");
+        return $this;
+    }
 }
