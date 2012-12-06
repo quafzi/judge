@@ -118,11 +118,20 @@ There are some command line options available:
    * - --verbose (-v)
      - Increase output verbosity
 
+Prerequisites
+-------------
+
+Judge obtains information on various Magento versions from a database that needs
+to be created before running the tool. Restore the database dump from
+`judge.sql.zip` (included in the root directory) and set your database
+credentials via Configuration_.
+
 Configuration
 -------------
 
-Judge comes with a sample configuration file, which resides at `ini/sample.judge.ini`. The most relevant configuration
-part is ``[plugins]``, where you can adjust tools, measures and other special settings for all evaluations.
+Judge comes with a sample configuration file, which resides at
+`ini/sample.judge.ini`. The most relevant configuration part is ``[plugins]``,
+where you can adjust tools, measures and other special settings for all evaluations.
 
 Quality Checks
 ==============
