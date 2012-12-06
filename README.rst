@@ -48,13 +48,8 @@ install it on your system:
 
 ::
 
+    cd judge
     curl -s http://getcomposer.org/installer | php
-
-If you like to pass an installation path for Composer, please use parameter ``--install-dir``, e.g.:
-
-::
-
-    curl -s http://getcomposer.org/installer | php -- --install-dir=bin
 
 .. _Composer: http://getcomposer.org/
 
@@ -62,7 +57,7 @@ Now you're ready to fetch all the required dependencies:
 
 ::
 
-    composer install
+    php composer.phar install
 
 You should see something like that:
 
