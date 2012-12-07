@@ -292,6 +292,12 @@ class CodeCoverage implements JudgePlugin
     protected function generateJumpstormConfig($extensionPath)
     {
         $this->config->extensions = array('ext' => array('source' => $extensionPath));
+        if ($this->settings->jumpstormIniFile) {
+            $jumpStormConfig = new Config($this->settings->jumpstormIniFile);
+            $this->config->common      = $jumpStormConfig->common;
+            $this->config->magento     = $jumpStormConfig->magento;
+            $this->config->unittesting = $jumpStormConfig->unittesting;
+        }
         $filename = dirname(__FILE__) . DIRECTORY_SEPARATOR .'config.ini';
         $writer = new \Zend_Config_Writer_Ini();
         $writer->write($filename, $this->config);

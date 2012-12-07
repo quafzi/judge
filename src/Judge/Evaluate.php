@@ -21,10 +21,10 @@ use MtHaml\Autoloader as HamlLoader;
 use \Exception as Exception;
 
 /**
- * Setup Magento
+ * Initiate evaluating a Magento extension
  *
- * @package    Jumpstorm
- * @subpackage Jumpstorm
+ * @package    Judge
+ * @subpackage Judge
  * @author     Thomas Birke <thomas.birke@netresearch.de>
  */
 class Evaluate extends Command
@@ -36,7 +36,7 @@ class Evaluate extends Command
         $this->addArgument('extensions', InputArgument::REQUIRED, 'path to the extensions to judge (separate by ",")');
         $this->addOption('config',  'c', InputOption::VALUE_OPTIONAL, 'provide a configuration file', 'ini/sample.judge.ini');
     }
-    
+
     /**
      * @see vendor/symfony/src/Symfony/Component/Console/Command/Symfony\Component\Console\Command.Command::execute()
      */
@@ -70,7 +70,7 @@ class Evaluate extends Command
 
                 // set path to plugin by convention
                 $path = $this->getBasePath() . 'plugins' . DIRECTORY_SEPARATOR . $name . DIRECTORY_SEPARATOR;
-                
+
                 // load script file
                 $file =  $path . $name . '.php';
                 if (!file_exists($file)) {
@@ -79,7 +79,7 @@ class Evaluate extends Command
                     continue;
                 }
 
-                // load default jumpstorm config for plugin execution
+                // load default judge config for plugin execution
                 $pluginConfig = $this->config;
 
                 $customIni = $settings->ini;
@@ -99,70 +99,11 @@ class Evaluate extends Command
             $this->generateResultHtml($extensionPath);
         }
     }
-    
-    /**
-     * Create empty database. Any old database with the same name gets dropped.
-     * 
-     * @return boolean true on success, false otherwise
-     */
-    protected function createDatabase($dbName)
-    {
-        // prepare mysql command: user, host and password
-        $mysql = $this->prepareMysqlCommand();
-        
-        // recreate database if it already exists
-        Logger::log('Creating database %s', array($dbName));
 
-        exec(sprintf(
-            '%s -e \'DROP DATABASE IF EXISTS `%s`\'',
-            $mysql,
-            $dbName
-        ), $result, $return);
-        
-        exec(sprintf(
-            '%s -e \'CREATE DATABASE `%s`\'',
-            $mysql,
-            $dbName
-        ), $result, $return);
-
-        return (0 === $return);
-    }
-    
-    /**
-     * Prepare command for database access, including:
-     * <ul>
-     * <li>username</li>
-     * <li>host</li>
-     * <li>password</li>
-     * </ul>
-     * 
-     * @return string MySQL command line string including credentials
-     */
-    protected function prepareMysqlCommand()
-    {
-        $mysql = sprintf(
-            'mysql -u%s -h%s',
-            $this->config->getDbUser(),
-            $this->config->getDbHost()
-        );
-
-        // prepare mysql command: password
-        if (!is_null($this->config->getDbPass())) {
-            $mysql .= sprintf(' -p%s', $this->config->getDbPass());
-        }
-
-        return $mysql;
-    }
 
     protected function getBasePath()
     {
         return realpath(dirname(__FILE__)) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR;
-    }
-
-    protected function initMagento()
-    {
-        require_once($this->config->getTarget() . DIRECTORY_SEPARATOR . 'app' . DIRECTORY_SEPARATOR . 'Mage.php');
-        \Mage::app();
     }
 
     protected function generateResultHtml($extension)
