@@ -56,7 +56,7 @@ class CodeCoverage implements JudgePlugin
     protected function evaluateTestCoverage($extensionPath)
     {
         $score = $this->settings->good;
-        $executable = 'vendor/EHER/PHPUnit/bin/phpunit';
+        $executable = 'vendor/bin/phpunit';
         $codeCoverages  = array();
         $phpUnitOutput  = array();
         $paramsArray    = array();

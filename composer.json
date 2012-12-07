@@ -1,23 +1,18 @@
 {
     "name": "netresearch/judge",
     "description": "Magento extension evaluator",
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "git@gitorious.nr:tools/jumpstorm.git"
-        }
-    ],
     "require": {
-        "pdepend/pdepend":           "dev-master",
-        "eher/phpunit":              "dev-master",
-        "phpmd/phpmd":               "dev-master",
-        "squizlabs/php_codesniffer": "dev-master",
-        "nikic/php-parser":          "dev-master",
-        "dg/dibi":                   "dev-master",
-        "netresearch/jumpstorm":     "dev-master",
-        "symfony/console":           "2.0.x-dev",
-        "symfony/class-loader":      "2.0.x-dev",
-        "mthaml/mthaml":             "dev-master"
+        "pdepend/pdepend":             "dev-master",
+        "phpunit/phpunit":             "3.7.10",
+        "phpmd/phpmd":                 "dev-master",
+        "squizlabs/php_codesniffer":   "dev-master",
+        "nikic/php-parser":            "dev-master",
+        "dg/dibi":                     "dev-master",
+        "netresearch/jumpstorm":       "dev-master",
+        "symfony/console":             "2.0.x-dev",
+        "symfony/class-loader":        "2.0.x-dev",
+        "mthaml/mthaml":               "dev-master",
+        "pear-pear.phpunit.de/phpcpd": "*"
     },
     "authors": [
         {
@@ -27,6 +22,16 @@
         {
             "name": "Michael Lühr",
             "email": "michael.luehr@netresearch.de"
+        }
+    ],
+    "repositories": [
+        {
+            "type": "pear",
+            "url": "pear.phpunit.de"
+        },
+        {
+            "type": "vcs",
+            "url": "git://github.com/netresearch/jumpstorm.git"
         }
     ]
 }

@@ -109,7 +109,7 @@ class SourceCodeComplexity implements JudgePlugin
      */
     protected function executePHPCpd($extensionPath)
     {
-        $executable = 'vendor/EHER/PHPUnit/bin/phpcpd';
+        $executable = 'vendor/bin/phpcpd';
         $line = '';
         $cpdPercentage = 0;
         $scoreForPhpCpd = $this->settings->phpcpd->good;
