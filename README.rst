@@ -39,9 +39,11 @@ Installation
 
 Install judge with Composer_:
 
+.. _Composer: http://getcomposer.org/
+
 ::
 
-    wget -q https://raw.github.com/NetresearchAppFactory/judge/master/composer.json && curl -s https://getcomposer.org/installer | php; php composer.phar install --prefer-source
+    git clone git://github.com/NetresearchAppFactory/judge.git && cd judge && curl -s https://getcomposer.org/installer | php; php composer.phar install --prefer-source
 
 *That's all. Happy judging :)*
 
