@@ -8,12 +8,12 @@ use Netresearch\Source\Base as Source;
 use \Exception as Exception;
 
 /**
- * Git Handler for jumpstorm
+ * Git Handler for judge
  */
 class Git extends Source implements SourceInterface
 {
     const GIT_DEFAULT_BRANCH = 'master';
-    
+
     /**
      * @see SourceInterface::copy()
      */
@@ -22,9 +22,9 @@ class Git extends Source implements SourceInterface
         if (!Source::isGitRepo($this->source)) {
             throw new Exception('Provided source is not a Git repository: ' . $this->source);
         }
-        
+
         $this->_cloneRepository($this->source, $target);
-        
+
         if ((null !== $branch) && (self::GIT_DEFAULT_BRANCH !== $branch)) {
             $this->_checkout($target, $branch);
         }
@@ -49,7 +49,7 @@ class Git extends Source implements SourceInterface
     protected function _checkout($targetPath, $branch)
     {
         Logger::log('Git checkout %s', array($branch));
-        
+
         $command = sprintf('cd %s; git checkout %s 2>&1; cd -', $targetPath, $branch);
         exec($command, $result, $return);
 
