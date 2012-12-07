@@ -2,17 +2,19 @@
     "name": "netresearch/judge",
     "description": "Magento extension evaluator",
     "require": {
-        "pdepend/pdepend":             "dev-master",
-        "phpunit/phpunit":             "3.7.10",
-        "phpmd/phpmd":                 "dev-master",
-        "squizlabs/php_codesniffer":   "dev-master",
-        "nikic/php-parser":            "dev-master",
-        "dg/dibi":                     "dev-master",
-        "netresearch/jumpstorm":       "dev-master",
-        "symfony/console":             "2.0.x-dev",
-        "symfony/class-loader":        "2.0.x-dev",
-        "mthaml/mthaml":               "dev-master",
-        "pear-pear.phpunit.de/phpcpd": "*"
+        "pdepend/pdepend":                                  "dev-master",
+        "phpunit/phpunit":                                  "3.7.10",
+        "phpmd/phpmd":                                      "dev-master",
+        "squizlabs/php_codesniffer":                        "dev-master",
+        "nikic/php-parser":                                 "dev-master",
+        "dg/dibi":                                          "dev-master",
+        "netresearch/jumpstorm":                            "dev-master",
+        "symfony/console":                                  "2.0.x-dev",
+        "symfony/class-loader":                             "2.0.x-dev",
+        "mthaml/mthaml":                                    "dev-master",
+        "pear-pear.phpunit.de/phpcpd":                      "*",
+        "pear-bartlett.laurent-laville.org/PHP_CompatInfo": "2.9.0",
+        "pear-pear.netpirates.net/fDOMDocument":            "*"
     },
     "authors": [
         {
@@ -28,6 +30,18 @@
         {
             "type": "pear",
             "url": "pear.phpunit.de"
+        },
+        {
+            "type": "pear",
+            "url": "bartlett.laurent-laville.org"
+        },
+        {
+            "type": "pear",
+            "url": "components.ez.no"
+        },
+        {
+            "type": "pear",
+            "url": "pear.netpirates.net"
         },
         {
             "type": "vcs",

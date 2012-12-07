@@ -22,8 +22,6 @@ class PhpCompatibility implements JudgePlugin
 
     public function execute($extensionPath)
     {
-        require_once 'plugins/' . $this->name . '/lib/PHP/CompatInfo/PHP/CompatInfo/Autoload.php';
-
         $settings = $this->config->plugins->{$this->name};
         $this->extensionPath = $extensionPath;
 
