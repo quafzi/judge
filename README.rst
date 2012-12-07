@@ -41,7 +41,7 @@ First of all you need Judge itself, of course. So you'll have to clone it recurs
 
 ::
 
-    git clone git@gitorious.nr:tools/judge.git --recursive
+    git clone git@gitorious.nr:tools/judge.git
 
 Judge requires a lot of tools to evaluate extensions. For dependency management, we use Composer_. So you'll have to
 install it on your system:
@@ -64,31 +64,54 @@ You should see something like that:
 ::
 
     Installing dependencies
-      - Installing symfony/finder (v2.0.16)
-        Downloading: 100%         
+      - Installing symfony/yaml (v2.1.4)
 
-      - Installing eher/phpunit (dev-master)
-        Cloning 5129a677f272d49f6aee8223aa3a1b5fed2a53b7
+      - Installing phpunit/php-text-template (1.1.4)
 
-      - Installing pdepend/pdepend (dev-master)
-        Cloning f62a21752b5de843c329065641b3034aad59bce7
+      - Installing phpunit/phpunit-mock-objects (1.2.2)
 
-      - Installing phpmd/phpmd (dev-master)
-        Cloning efa8b0958f2174a4ccaf635f5225258b6cb36ea1
+      - Installing phpunit/php-timer (1.0.4)
 
-      - Installing zerkalica/php_codesniffer (dev-master)
-        Cloning a2c210f57d478697b0746bbd2bc76fccfda8a3b4
+      - Installing phpunit/php-token-stream (1.1.5)
 
+      - Installing phpunit/php-file-iterator (1.3.3)
+
+      - Installing phpunit/php-code-coverage (1.2.7)
+
+      - Installing phpunit/phpunit (3.7.10)
+
+      - Installing pdepend/pdepend (dev-master 981b7c9)
+        Cloning 981b7c9c831dc489523c5034729eba7297fa424e
+
+      - Installing nikic/php-parser (dev-master v0.9.3)
+        Cloning v0.9.3
+
+      - Installing phpmd/phpmd (dev-master 34cfbf3)
+        Cloning 34cfbf382dd2a62b2bb3573a9fb3737c8f5a0eec
+
+      - Installing squizlabs/php_codesniffer (dev-master c051e90)
+        Cloning c051e90d483a9a0c83d61381d5a3625da98f2d6a
+
+      - Installing dg/dibi (dev-master 8cda140)
+        Cloning 8cda1401ffc0db28da89bb132cae315995dc73f5
+
+      - Installing symfony/class-loader (2.0.x-dev v2.0.19)
+        Cloning v2.0.19
+
+      - Installing symfony/console (2.0.x-dev v2.0.19)
+        Cloning v2.0.19
+
+      - Installing netresearch/jumpstorm (dev-master 7735cf1)
+        Cloning 7735cf15bc166ea37c6aecceecdbe60d9ecccbce
+
+      - Installing mthaml/mthaml (dev-master 0c02a75)
+        Cloning 0c02a75c791e9f4deed981483c041a96badaf5ad
+
+      - Installing pear-pear.phpunit.de/file_iterator (1.3.3)
+      - Installing pear-pear.phpunit.de/phpcpd (1.2.2)
+    phpunit/phpunit suggests installing phpunit/php-invoker (>=1.1.0)
     Writing lock file
     Generating autoload files
-
-Though that is a bit strange, you probably need to call
-
-::
-
-    cd vendor/EHER/PHPUnit && ./build.sh && cd -
-
-to fetch some further dependencies...
 
 *That's all. Happy judging :)*
 

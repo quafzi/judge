@@ -23,8 +23,6 @@ class MageCompatibility implements JudgePlugin
     {
         $this->settings = $this->config->plugins->{$this->name};
         $this->extensionPath = $extensionPath;
-        $includePath = get_include_path() . PATH_SEPARATOR . $this->config->common->magento->target . DIRECTORY_SEPARATOR . 'app';
-        set_include_path($includePath);
         $this->connectTagDatabase();
 
         $availableVersions = dibi::query('SELECT concat( m.edition, " ", m.version ) as Magento FROM magento m ORDER BY Magento')->fetchPairs();
