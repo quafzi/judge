@@ -37,81 +37,11 @@ Judge requires some PEAR packages to be installed:
 Installation
 ============
 
-First of all you need Judge itself, of course. So you'll have to clone it recursively:
+Install judge with Composer_:
 
 ::
 
-    git clone git@gitorious.nr:tools/judge.git
-
-Judge requires a lot of tools to evaluate extensions. For dependency management, we use Composer_. So you'll have to
-install it on your system:
-
-::
-
-    cd judge
-    curl -s http://getcomposer.org/installer | php
-
-.. _Composer: http://getcomposer.org/
-
-Now you're ready to fetch all the required dependencies:
-
-::
-
-    php composer.phar install
-
-You should see something like that:
-
-::
-
-    Installing dependencies
-      - Installing symfony/yaml (v2.1.4)
-
-      - Installing phpunit/php-text-template (1.1.4)
-
-      - Installing phpunit/phpunit-mock-objects (1.2.2)
-
-      - Installing phpunit/php-timer (1.0.4)
-
-      - Installing phpunit/php-token-stream (1.1.5)
-
-      - Installing phpunit/php-file-iterator (1.3.3)
-
-      - Installing phpunit/php-code-coverage (1.2.7)
-
-      - Installing phpunit/phpunit (3.7.10)
-
-      - Installing pdepend/pdepend (dev-master 981b7c9)
-        Cloning 981b7c9c831dc489523c5034729eba7297fa424e
-
-      - Installing nikic/php-parser (dev-master v0.9.3)
-        Cloning v0.9.3
-
-      - Installing phpmd/phpmd (dev-master 34cfbf3)
-        Cloning 34cfbf382dd2a62b2bb3573a9fb3737c8f5a0eec
-
-      - Installing squizlabs/php_codesniffer (dev-master c051e90)
-        Cloning c051e90d483a9a0c83d61381d5a3625da98f2d6a
-
-      - Installing dg/dibi (dev-master 8cda140)
-        Cloning 8cda1401ffc0db28da89bb132cae315995dc73f5
-
-      - Installing symfony/class-loader (2.0.x-dev v2.0.19)
-        Cloning v2.0.19
-
-      - Installing symfony/console (2.0.x-dev v2.0.19)
-        Cloning v2.0.19
-
-      - Installing netresearch/jumpstorm (dev-master 7735cf1)
-        Cloning 7735cf15bc166ea37c6aecceecdbe60d9ecccbce
-
-      - Installing mthaml/mthaml (dev-master 0c02a75)
-        Cloning 0c02a75c791e9f4deed981483c041a96badaf5ad
-
-      - Installing pear-pear.phpunit.de/file_iterator (1.3.3)
-      - Installing pear-pear.phpunit.de/phpcpd (1.2.2)
-    phpunit/phpunit suggests installing phpunit/php-invoker (>=1.1.0)
-    Writing lock file
-    Generating autoload files
+    wget -q https://raw.github.com/NetresearchAppFactory/judge/master/composer.json && curl -s https://getcomposer.org/installer | php; php composer.phar install --prefer-source
 
 *That's all. Happy judging :)*
 
