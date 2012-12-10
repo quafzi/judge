@@ -29,6 +29,10 @@
     "repositories": [
         {
             "type": "pear",
+            "url": "pear.php.net"
+        },
+        {
+            "type": "pear",
             "url": "pear.phpunit.de"
         },
         {
