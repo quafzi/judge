@@ -27,9 +27,15 @@ class SourceCodeComplexity implements JudgePlugin
     public function execute($extensionPath)
     {
         $score = 0;
-        $score = $score + $this->executePHPDepend($extensionPath);
-        $score = $score + $this->executePHPCpd($extensionPath);
-        $score = $score + $this->executePHPMessDetector($extensionPath);
+        if ($this->settings->phpDepend->enabled) {
+            $score = $score + $this->executePHPDepend($extensionPath);
+        }
+        if ($this->settings->phpcpd->enabled) {
+            $score = $score + $this->executePHPCpd($extensionPath);
+        }
+        if ($this->settings->phpMessDetector->enabled) {
+            $score = $score + $this->executePHPMessDetector($extensionPath);
+        }
         Logger::setScore($extensionPath, $this->name, $score);
         return $score;
     }
