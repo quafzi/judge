@@ -115,28 +115,35 @@ class SourceCodeComplexity implements JudgePlugin
      */
     protected function executePHPCpd($extensionPath)
     {
-        $executable = 'vendor/bin/phpcpd';
-        $line = '';
-        $cpdPercentage = 0;
-        $scoreForPhpCpd = $this->settings->phpcpd->good;
         $minLines   = $this->settings->phpcpd->minLines;
         $minTokens  = $this->settings->phpcpd->minTokens;
-        $command = sprintf($executable . ' --min-lines "%s" --min-tokens "%s" --quiet "%s"', $minLines, $minTokens, $extensionPath);
-        exec($command, $output);
-        foreach ($output as $line) {
-            if (false !== strpos($line, '% duplicated')) {
-                break;
-            }
-        }
-        $cpdPercentage = substr($line, 0, strpos($line, '%'));
+        $verbose = null;
+        $suffixes = '';
+        $exclude  = array();
+        $commonPath = false;
+
+        $facade = new \File_Iterator_Facade;
+        $files = $facade->getFilesAsArray(
+            $extensionPath, $suffixes, array(), $exclude, $commonPath
+        );
+
+        $strategy = new \PHPCPD_Detector_Strategy_Default;
+        $detector = new \PHPCPD_Detector($strategy, $verbose);
+
+        $clones = $detector->copyPasteDetection(
+          $files, $minLines, $minTokens
+        );
+
+        $cpdPercentage = $clones->getPercentage();
+
         if ($this->settings->phpcpd->percentageGood < $cpdPercentage) {
             Logger::addComment(
                 $extensionPath,
                 $this->name,
                 sprintf('<comment>Extension contains %s%% of duplicated code.</comment>', $cpdPercentage)
             );
-            $scoreForPhpCpd = $this->settings->phpcpd->bad;
+            return $this->settings->phpcpd->bad;
         }
-        return $scoreForPhpCpd;
+        return $this->settings->phpcpd->good;
     }
 }
