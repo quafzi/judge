@@ -113,7 +113,7 @@ class Extension extends Config
                         continue;
                     }
                     else {
-    //                    file_put_contents($item . '.stmts.xml', var_export($xml, true));
+//                        file_put_contents($item . '.stmts.xml', var_export($xml, true));
                         $numberOfMethodCalls = $this->collectMethodCalls(
                             $stmts,
                             simplexml_load_string($xml)
@@ -167,7 +167,12 @@ class Extension extends Config
         } elseif ($node->xpath('./node:Expr_MethodCall')) {
             $methodName = current($node->xpath('./node:Expr_MethodCall/subNode:name/scalar:string/text()'));
             if ('load' == $methodName) {
-                $type = $this->getResultType(current($node->xpath('./node:Expr_MethodCall/subNode:var')));
+                $caller = (string) current($node->xpath('./node:Expr_MethodCall/subNode:var/node:Expr_Variable/subNode:name/scalar:string/text()'));
+                $assignedVar = (string) current($node->xpath('./node:Expr_MethodCall/../../subNode:var/node:Expr_Variable/subNode:name/scalar:string/text()'));
+                // avoid infinity loops due to recursion
+                if ($caller != $assignedVar) {
+                    $type = $this->getResultType(current($node->xpath('./node:Expr_MethodCall/subNode:var')));
+                }
             } elseif ('get' === substr($methodName, 0, 3) && 'Id' === substr($methodName, -2)) {
                 $type = Method::TYPE_INT;
             }
